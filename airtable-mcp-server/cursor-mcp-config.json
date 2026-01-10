@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "airtable": {
+      "command": "node",
+      "args": [
+        "/Users/corentinlavenan/Documents/17-Endosia/Code Airtable/portail-client (1)/airtable-mcp-server/src/index.js"
+      ],
+      "env": {
+        "AIRTABLE_API_KEY": "YOUR_AIRTABLE_API_KEY",
+        "AIRTABLE_BASE_ID": "YOUR_AIRTABLE_BASE_ID"
+      }
+    }
+  }
+}

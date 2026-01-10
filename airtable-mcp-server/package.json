@@ -1,0 +1,27 @@
+{
+  "name": "airtable-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for Airtable - Vertical View Client Portal",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "airtable-mcp-server": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "airtable": "^0.12.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "airtable",
+    "model-context-protocol"
+  ],
+  "author": "Vertical View",
+  "license": "MIT"
+}
