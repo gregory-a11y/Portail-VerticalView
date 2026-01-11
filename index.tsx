@@ -283,12 +283,12 @@ const UnifiedContractSection = ({ contract }: { contract: Contract }) => {
                 <div className="space-y-3">
                     <div className="flex justify-between text-sm font-medium">
                         <span className="opacity-70" style={{ color: BRAND.blue }}>Consommation du pack</span>
-                        <span style={{ color: BRAND.primaryCoral }}>{contract.deliveredVideos} / {contract.totalVideos} vidéos</span>
+                        <span style={{ color: BRAND.blue }}>{contract.deliveredVideos} / {contract.totalVideos} vidéos</span>
                     </div>
                     <div className="h-3 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#F0F4FF" }}>
                         <div 
                             className="h-full rounded-full transition-all duration-1000"
-                            style={{ width: `${percent}%`, backgroundColor: BRAND.primaryCoral }}
+                            style={{ width: `${percent}%`, backgroundColor: BRAND.blue }}
                         />
                     </div>
                 </div>
