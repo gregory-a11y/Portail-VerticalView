@@ -811,6 +811,9 @@ const App = () => {
   const [clientRecordId, setClientRecordId] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Pagination pour l'historique
+  const [historyLimit, setHistoryLimit] = useState(5);
 
   // Check for Magic Link (supports ?ref= or ?client=)
   useEffect(() => {
@@ -1005,9 +1008,6 @@ const App = () => {
   const deliveredVideos = videos.filter(v => 
     v.status.includes("Livrée") || v.status.includes("Archivée")
   );
-  
-  // Pagination pour l'historique
-  const [historyLimit, setHistoryLimit] = useState(5);
 
   return (
     <div className="min-h-screen font-sans flex flex-col" style={{ backgroundColor: BRAND.bgLight }}>
