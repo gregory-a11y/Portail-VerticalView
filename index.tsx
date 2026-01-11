@@ -180,9 +180,9 @@ const StatusIcon = ({ status }: { status: Status }) => {
 };
 
 const VideoRow: React.FC<{ video: Video; onOpen: (v: Video) => void }> = ({ video, onOpen }) => {
-  const getStatusLabel = (status: Status) => {
-    // Supprime les emojis et numéros du début du statut
-    return status.replace(/[📝📋✂️🔍👁️✅📦🗄️📨🔁]\s*\d+\.\s*/g, '').trim();
+  const getStatusLabel = (status: string) => {
+    // Supprime tout ce qui est avant la première lettre (emojis, numéros, points, espaces)
+    return status.replace(/^[^a-zA-ZÀ-ÿ]+/, '').trim();
   };
 
   // Seulement Review Client nécessite une action du client
@@ -433,9 +433,9 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
   
   if (!isOpen || !video) return null;
 
-  const getStatusLabel = (status: Status) => {
-    // Supprime les emojis et numéros du début du statut
-    return status.replace(/[📝📋✂️🔍👁️✅📦🗄️📨🔁]\s*\d+\.\s*/g, '').trim();
+  const getStatusLabel = (status: string) => {
+    // Supprime tout ce qui est avant la première lettre (emojis, numéros, points, espaces)
+    return status.replace(/^[^a-zA-ZÀ-ÿ]+/, '').trim();
   };
 
   const isValidated = video.status.includes("Validé");
@@ -465,7 +465,6 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
           'Vidéo': [video.id],
           'Titre': `Feedback - ${video.title}`,
           'Commentaire': comment,
-          'Statut': '🆕 Nouveau',
           'Type': '🔄 Révision demandée'
         });
       }
@@ -952,36 +951,25 @@ const App = () => {
                 Bienvenue, {client.companyName}
              </h1>
              <p className="text-base font-light" style={{ color: BRAND.blue }}>
-                Portail client • {client.type}
+                Portail client
              </p>
           </div>
+          
+          {/* Refresh button - discret */}
+          <button
+            onClick={() => refreshData(false)}
+            disabled={isRefreshing}
+            className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/80 transition-all disabled:opacity-50 opacity-40 hover:opacity-100"
+            style={{ color: BRAND.blue }}
+            title="Actualiser les données"
+          >
+            <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
+          </button>
       </div>
 
       {/* 2. MAIN CONTENT */}
       <main className="flex-1 px-4 lg:px-8 pb-12 w-full max-w-5xl mx-auto space-y-8 -mt-12 relative z-10">
         
-        {/* REFRESH BAR */}
-        <div className="animate-in fade-in duration-500 flex items-center justify-between bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm border" style={{ borderColor: BRAND.coloredWhite }}>
-          <div className="flex items-center gap-2 text-xs" style={{ color: BRAND.lightBlue }}>
-            <Clock size={14} />
-            {lastRefresh ? (
-              <span>Mis à jour à {lastRefresh.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
-            ) : (
-              <span>Données chargées</span>
-            )}
-            <span className="opacity-50">• Auto-refresh: 60s</span>
-          </div>
-          <button
-            onClick={() => refreshData(false)}
-            disabled={isRefreshing}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg hover:bg-[#F0F4FF] transition-colors disabled:opacity-50"
-            style={{ color: BRAND.blue }}
-          >
-            <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
-            {isRefreshing ? 'Actualisation...' : 'Actualiser'}
-          </button>
-        </div>
-
         {/* PROJECTS SECTION */}
         <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-forwards">
              <div className="flex items-center justify-between px-1 mb-3">
