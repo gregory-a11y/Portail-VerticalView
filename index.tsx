@@ -1006,22 +1006,22 @@ const App = () => {
     .filter(v => !v.status.includes("Livrée") && !v.status.includes("Archivée"))
     .sort((a, b) => getStatusPriority(a.status) - getStatusPriority(b.status));
   
-  // Vidéos livrées pour l'historique (triées par date de livraison, filtrées à 1 mois max)
+  // Vidéos livrées pour l'historique (triées par deadline, filtrées à 1 mois max)
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
   
   const deliveredVideos = videos
     .filter(v => v.status.includes("Livrée") || v.status.includes("Archivée"))
     .filter(v => {
-      // Garder seulement les vidéos livrées depuis moins d'un mois
-      if (!v.deliveryDate) return true; // Garder si pas de date de livraison
-      const deliveryDateObj = new Date(v.deliveryDate);
-      return deliveryDateObj >= oneMonthAgo;
+      // Garder seulement les vidéos avec deadline de moins d'un mois
+      if (!v.deadline) return true; // Garder si pas de deadline
+      const deadlineDate = new Date(v.deadline);
+      return deadlineDate >= oneMonthAgo;
     })
     .sort((a, b) => {
-      // Trier par date de livraison décroissante (plus récent en haut)
-      const dateA = a.deliveryDate ? new Date(a.deliveryDate).getTime() : 0;
-      const dateB = b.deliveryDate ? new Date(b.deliveryDate).getTime() : 0;
+      // Trier par deadline décroissante (plus récent en haut)
+      const dateA = a.deadline ? new Date(a.deadline).getTime() : 0;
+      const dateB = b.deadline ? new Date(b.deadline).getTime() : 0;
       return dateB - dateA;
     });
 
