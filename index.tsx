@@ -86,6 +86,7 @@ interface Video {
   priority: string;
   progress: number;
   deadline: string;
+  deliveryDate?: string;
   invoiceNumber: string;
   rushUrl?: string;
 }
@@ -940,6 +941,7 @@ const App = () => {
                     priority: rec.fields['Priorité'] || "",
                     progress: rec.fields['% Avancement'] || 0,
                     deadline: rec.fields['Deadline V1'] || "",
+                    deliveryDate: rec.fields['Date livraison réelle'] || "",
                     invoiceNumber: rec.fields['N° Facture'] || "",
                     rushUrl: rec.fields['Lien rushes'] || rec.fields['Lien Rushes'] || rec.fields['Lien Rush'] || ""
                 };
@@ -1004,22 +1006,22 @@ const App = () => {
     .filter(v => !v.status.includes("Livrée") && !v.status.includes("Archivée"))
     .sort((a, b) => getStatusPriority(a.status) - getStatusPriority(b.status));
   
-  // Vidéos livrées pour l'historique (triées par deadline, filtrées à 1 mois max)
+  // Vidéos livrées pour l'historique (triées par date de livraison, filtrées à 1 mois max)
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
   
   const deliveredVideos = videos
     .filter(v => v.status.includes("Livrée") || v.status.includes("Archivée"))
     .filter(v => {
-      // Garder seulement les vidéos avec deadline de moins d'un mois
-      if (!v.deadline) return true; // Garder si pas de deadline
-      const deadlineDate = new Date(v.deadline);
-      return deadlineDate >= oneMonthAgo;
+      // Garder seulement les vidéos livrées depuis moins d'un mois
+      if (!v.deliveryDate) return true; // Garder si pas de date de livraison
+      const deliveryDateObj = new Date(v.deliveryDate);
+      return deliveryDateObj >= oneMonthAgo;
     })
     .sort((a, b) => {
-      // Trier par deadline décroissant (plus récent en haut)
-      const dateA = a.deadline ? new Date(a.deadline).getTime() : 0;
-      const dateB = b.deadline ? new Date(b.deadline).getTime() : 0;
+      // Trier par date de livraison décroissante (plus récent en haut)
+      const dateA = a.deliveryDate ? new Date(a.deliveryDate).getTime() : 0;
+      const dateB = b.deliveryDate ? new Date(b.deliveryDate).getTime() : 0;
       return dateB - dateA;
     });
 
