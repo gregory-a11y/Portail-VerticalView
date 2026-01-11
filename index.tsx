@@ -653,7 +653,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                   <div className="text-xs mb-3 font-medium" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
                   {/* Étapes de production */}
-                  <div className="flex items-center">
+                  <div className="relative flex justify-between items-start">
                     {[
                       { name: 'Brief', key: 'Brief' },
                       { name: 'Pré-prod', key: 'Pré-prod' },
@@ -669,9 +669,9 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                       const isCurrent = index === currentStepIndex;
                       
                       return (
-                        <React.Fragment key={step.key}>
+                        <div key={step.key} className="flex flex-col items-center relative" style={{ flex: index < array.length - 1 ? '1' : '0' }}>
                           {/* Numéro de l'étape */}
-                          <div className="flex flex-col items-center relative">
+                          <div className="relative z-10">
                             <div 
                               className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
                                 isComplete ? 'text-white' : 
@@ -684,30 +684,34 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                             >
                               {isComplete ? '✓' : index + 1}
                             </div>
-                            <div className={`text-[10px] mt-2 font-medium whitespace-nowrap text-center ${
-                              isComplete || isCurrent ? '' : 'text-gray-400'
-                            }`}
-                            style={{
-                              color: isComplete || isCurrent ? BRAND.blue : undefined
-                            }}>
-                              {step.name}
-                            </div>
                           </div>
                           
-                          {/* Ligne de connexion */}
+                          <div className={`text-[10px] mt-2 font-medium whitespace-nowrap text-center ${
+                            isComplete || isCurrent ? '' : 'text-gray-400'
+                          }`}
+                          style={{
+                            color: isComplete || isCurrent ? BRAND.blue : undefined
+                          }}>
+                            {step.name}
+                          </div>
+                          
+                          {/* Ligne de connexion - positionnée au centre du cercle */}
                           {index < array.length - 1 && (
                             <div 
-                              className={`flex-1 h-0.5 transition-all ${
+                              className={`absolute h-0.5 transition-all ${
                                 isComplete ? '' : 'bg-gray-200'
                               }`}
                               style={{
                                 backgroundColor: isComplete ? BRAND.blue : undefined,
-                                marginLeft: '4px',
-                                marginRight: '4px'
+                                top: '18px', // Centre du cercle (9px de rayon + 9px)
+                                left: '50%',
+                                right: '-50%',
+                                width: 'calc(100% - 18px)',
+                                marginLeft: '9px'
                               }} 
                             />
                           )}
-                        </React.Fragment>
+                        </div>
                       );
                     })}
                   </div>
