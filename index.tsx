@@ -989,16 +989,17 @@ const App = () => {
 
   if (!client) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-[#E53B46]" size={40}/></div>;
 
-  // Fonction pour obtenir la priorité de tri des statuts
+  // Fonction pour obtenir la priorité de tri des statuts (ordre logique de production)
   const getStatusPriority = (status: string) => {
-    if (status.includes("Review Client")) return 0; // En premier
-    if (status.includes("Revision Interne")) return 1;
-    if (status.includes("Post-production")) return 2;
-    if (status.includes("Pré-prod") || status.includes("Pré-production")) return 3;
-    if (status.includes("Brief")) return 4;
-    if (status.includes("Tournage")) return 5;
-    if (status.includes("Validé")) return 6;
-    return 10;
+    if (status.includes("Review Client")) return 0; // 1. Action requise
+    if (status.includes("Brief")) return 1; // 2. Brief reçu
+    if (status.includes("Pré-prod") || status.includes("Pré-production")) return 2; // 3. Pré-production
+    if (status.includes("Tournage")) return 3; // 4. Tournage planifié
+    if (status.includes("Post-production")) return 4; // 5. Post-production
+    if (status.includes("Revision Interne")) return 5; // 6. Révision interne
+    if (status.includes("Validé")) return 6; // 7. Validé par le client
+    if (status.includes("Livrée")) return 7; // 8. Livrée
+    return 10; // Autres statuts à la fin
   };
 
   // Vidéos en cours, triées par priorité de statut
