@@ -648,20 +648,55 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                     {video.deadline && <span>• Deadline: {new Date(video.deadline).toLocaleDateString('fr-FR')}</span>}
                 </div>
                 
-                {/* Barre de progression des étapes */}
+                {/* Barre de progression par étapes */}
                 <div className="mt-4">
-                  <div className="flex items-center justify-between text-xs mb-2" style={{ color: BRAND.lightBlue }}>
-                    <span className="font-medium">Avancement du projet</span>
-                    <span className="font-semibold" style={{ color: BRAND.darkBlue }}>{Math.round(video.progress * 100)}%</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#F0F4FF" }}>
-                    <div 
-                      className="h-full transition-all duration-500 ease-out"
-                      style={{ 
-                        width: `${video.progress * 100}%`,
-                        backgroundColor: isDelivered || isValidated ? BRAND.success : isInClientReview || isInInternalReview ? BRAND.warning : BRAND.blue
-                      }}
-                    />
+                  <div className="text-xs mb-3 font-medium" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
+                  
+                  {/* Étapes de production */}
+                  <div className="flex items-center justify-between">
+                    {[
+                      { name: 'Brief', key: 'Brief' },
+                      { name: 'Pré-prod', key: 'Pré-prod' },
+                      { name: 'Tournage', key: 'Tournage' },
+                      { name: 'Post-prod', key: 'Post-production' },
+                      { name: 'Review', key: 'Review' },
+                      { name: 'Validé', key: 'Validé' },
+                      { name: 'Livré', key: 'Livrée' }
+                    ].map((step, index, array) => {
+                      // Déterminer si cette étape est complète
+                      const currentStepIndex = array.findIndex(s => video.status.includes(s.key));
+                      const isComplete = index < currentStepIndex;
+                      const isCurrent = index === currentStepIndex;
+                      
+                      return (
+                        <React.Fragment key={step.key}>
+                          {/* Numéro de l'étape */}
+                          <div className="flex flex-col items-center">
+                            <div 
+                              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
+                                isComplete ? 'bg-blue-500 text-white' : 
+                                isCurrent ? 'bg-blue-500 text-white ring-4 ring-blue-100' : 
+                                'bg-gray-200 text-gray-400'
+                              }`}
+                            >
+                              {isComplete ? '✓' : index + 1}
+                            </div>
+                            <div className={`text-xs mt-1.5 font-medium ${
+                              isComplete || isCurrent ? 'text-blue-600' : 'text-gray-400'
+                            }`}>
+                              {step.name}
+                            </div>
+                          </div>
+                          
+                          {/* Ligne de connexion */}
+                          {index < array.length - 1 && (
+                            <div className={`flex-1 h-0.5 mb-6 transition-all ${
+                              isComplete ? 'bg-blue-500' : 'bg-gray-200'
+                            }`} />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
                   </div>
                 </div>
             </div>
