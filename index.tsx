@@ -497,6 +497,77 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
     }
   };
 
+  // Fonction pour détecter et convertir l'URL vidéo en embed
+  const getEmbedUrl = (url: string) => {
+    if (!url) return null;
+    
+    // YouTube
+    const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+    if (youtubeMatch) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+    }
+    
+    // Vimeo
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+      return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    }
+    
+    // Google Drive - Convertir en format preview
+    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+    if (driveMatch) {
+      return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+    }
+    
+    // Google Drive - Format open?id=
+    const driveMatch2 = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+    if (driveMatch2) {
+      return `https://drive.google.com/file/d/${driveMatch2[1]}/preview`;
+    }
+    
+    // Vidéo directe (.mp4, .webm, etc.)
+    if (url.match(/\.(mp4|webm|ogg)$/i)) {
+      return url;
+    }
+    
+    return null;
+  };
+
+  const embedUrl = video.videoUrl ? getEmbedUrl(video.videoUrl) : null;
+  const isDirectVideo = embedUrl && embedUrl === video.videoUrl && embedUrl.match(/\.(mp4|webm|ogg)$/i);
+
+  // Composant pour le player vidéo
+  const VideoPlayer = () => {
+    if (!embedUrl) return null;
+    
+    return (
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider opacity-60" style={{ color: BRAND.blue }}>
+          Aperçu vidéo
+        </h4>
+        <div className="aspect-video bg-black rounded-xl overflow-hidden">
+          {isDirectVideo ? (
+            <video 
+              controls 
+              className="w-full h-full"
+              src={embedUrl}
+            >
+              Votre navigateur ne supporte pas la lecture vidéo.
+            </video>
+          ) : (
+            <iframe
+              src={embedUrl}
+              className="w-full h-full"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // Composant pour les liens
   const VideoLinks = () => (
     <div className="space-y-3">
@@ -582,8 +653,13 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-            {/* Liens toujours visibles */}
-            <VideoLinks />
+            {/* Player vidéo si disponible */}
+            <VideoPlayer />
+            
+            {/* Liens */}
+            <div className={embedUrl ? 'mt-6' : ''}>
+              <VideoLinks />
+            </div>
 
             {/* Section spécifique selon le statut */}
             {(isValidated || isDelivered) && (
@@ -908,9 +984,30 @@ const App = () => {
 
   if (!client) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-[#E53B46]" size={40}/></div>;
 
-  const ongoingVideos = videos.filter(v => 
-    !v.status.includes("Livrée") && !v.status.includes("Archivée")
+  // Fonction pour obtenir la priorité de tri des statuts
+  const getStatusPriority = (status: string) => {
+    if (status.includes("Review Client")) return 0; // En premier
+    if (status.includes("Revision Interne")) return 1;
+    if (status.includes("Post-production")) return 2;
+    if (status.includes("Pré-prod") || status.includes("Pré-production")) return 3;
+    if (status.includes("Brief")) return 4;
+    if (status.includes("Tournage")) return 5;
+    if (status.includes("Validé")) return 6;
+    return 10;
+  };
+
+  // Vidéos en cours, triées par priorité de statut
+  const ongoingVideos = videos
+    .filter(v => !v.status.includes("Livrée") && !v.status.includes("Archivée"))
+    .sort((a, b) => getStatusPriority(a.status) - getStatusPriority(b.status));
+  
+  // Vidéos livrées pour l'historique
+  const deliveredVideos = videos.filter(v => 
+    v.status.includes("Livrée") || v.status.includes("Archivée")
   );
+  
+  // Pagination pour l'historique
+  const [historyLimit, setHistoryLimit] = useState(5);
 
   return (
     <div className="min-h-screen font-sans flex flex-col" style={{ backgroundColor: BRAND.bgLight }}>
@@ -972,10 +1069,11 @@ const App = () => {
         
         {/* PROJECTS SECTION */}
         <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-forwards">
-             <div className="flex items-center justify-between px-1 mb-3">
+            {/* En cours */}
+            <div className="flex items-center justify-between px-1 mb-3">
                 <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: BRAND.darkBlue }}>
                     <ListVideo size={20} className="text-[#E53B46]" />
-                    Projets en cours
+                    Projets en cours ({ongoingVideos.length})
                 </h2>
             </div>
             
@@ -990,6 +1088,35 @@ const App = () => {
                     </div>
                 )}
             </div>
+            
+            {/* Historique */}
+            {deliveredVideos.length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center justify-between px-1 mb-3">
+                    <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: BRAND.darkBlue }}>
+                        <CheckCircle2 size={20} className="text-emerald-500" />
+                        Historique ({deliveredVideos.length})
+                    </h2>
+                </div>
+                
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm border" style={{ borderColor: BRAND.coloredWhite }}>
+                    {deliveredVideos.slice(0, historyLimit).map(video => (
+                        <VideoRow key={video.id} video={video} onOpen={setSelectedVideo} />
+                    ))}
+                </div>
+                
+                {/* Bouton charger plus */}
+                {deliveredVideos.length > historyLimit && (
+                  <button
+                    onClick={() => setHistoryLimit(prev => prev + 5)}
+                    className="w-full mt-3 py-3 px-4 bg-white border rounded-xl text-sm font-medium hover:bg-[#F8FBFF] transition-colors flex items-center justify-center gap-2"
+                    style={{ borderColor: BRAND.coloredWhite, color: BRAND.blue }}
+                  >
+                    Voir plus ({deliveredVideos.length - historyLimit} restantes)
+                  </button>
+                )}
+              </div>
+            )}
         </div>
 
         {/* CONTRACTS SECTION - All contracts */}
