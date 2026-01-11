@@ -19,7 +19,8 @@ import {
   Loader2,
   LogIn,
   AlertTriangle,
-  MessageCircle
+  MessageCircle,
+  RefreshCw
 } from "lucide-react";
 
 // --- CONFIGURATION AIRTABLE ---
@@ -807,19 +808,52 @@ const App = () => {
   
   // Data State
   const [client, setClient] = useState<Client | null>(null);
-  const [contract, setContract] = useState<Contract | null>(null);
+  const [contracts, setContracts] = useState<Contract[]>([]); // Multiple contracts support
   const [videos, setVideos] = useState<Video[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  
+  // Refresh & Cache State
+  const [clientRecordId, setClientRecordId] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Check for Magic Link (supports ?ref= or ?client=)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const clientId = params.get('client') || params.get('ref'); // Magic link param
     if (clientId && clientId.startsWith('rec')) {
+        setClientRecordId(clientId);
         handleMagicLogin(clientId);
     }
   }, []);
+
+  // Auto-refresh every 60 seconds
+  useEffect(() => {
+    if (!clientRecordId || view !== 'dashboard') return;
+    
+    const interval = setInterval(() => {
+      refreshData(true); // Silent refresh
+    }, 60000); // 60 seconds
+    
+    return () => clearInterval(interval);
+  }, [clientRecordId, view]);
+
+  // Manual refresh function with rate limiting
+  const refreshData = async (silent = false) => {
+    if (!clientRecordId || isRefreshing) return;
+    
+    if (!silent) setIsRefreshing(true);
+    
+    try {
+      await fetchClientData(clientRecordId);
+      setLastRefresh(new Date());
+    } catch (err) {
+      console.error("Refresh failed:", err);
+    } finally {
+      if (!silent) setIsRefreshing(false);
+    }
+  };
 
   const fetchClientData = async (clientRecordId: string) => {
       try {
@@ -859,33 +893,37 @@ const App = () => {
 
         const safeCompanyName = clientData.companyName.replace(/'/g, "\\'");
 
-        // 3. Fetch Contract - Utiliser le nom du client pour la recherche (linked records)
+        // 3. Fetch ALL Contracts - Utiliser le nom du client pour la recherche (linked records)
         try {
+            // Petit délai pour respecter la limite API (5 appels/sec)
+            await new Promise(resolve => setTimeout(resolve, 250));
+            
             const contractRes = await fetchAirtable(AIRTABLE_CONFIG.tables.contrats, `FIND('${safeCompanyName}', {Clients}) > 0`);
             
             if (contractRes.records.length > 0) {
-                const contractRec = contractRes.records[0];
-                const contractFile = contractRec.fields['Contrat']?.[0];
-                
-                setContract({
-                    id: contractRec.id,
-                    name: contractRec.fields['Nom du contrat'] || "",
-                    type: contractRec.fields['Type de contrat'] || "Contrat Cadre",
-                    totalVideos: contractRec.fields['Vidéos prévues'] || 0,
-                    deliveredVideos: contractRec.fields['Vidéos livrées'] || 0,
-                    startDate: contractRec.fields['Date de début'] || "",
-                    endDate: contractRec.fields['Date de fin'] || "",
-                    status: contractRec.fields['Statut du contrat'] || contractRec.fields['Statut contrat'] || "Actif",
-                    progressionPercent: contractRec.fields['Progression accomplissement du contrat %'] || 0,
-                    contractFileUrl: contractFile?.url || "",
-                    contractFileName: contractFile?.filename || "contrat.pdf"
+                const mappedContracts: Contract[] = contractRes.records.map((contractRec: any) => {
+                    const contractFile = contractRec.fields['Contrat']?.[0];
+                    return {
+                        id: contractRec.id,
+                        name: contractRec.fields['Nom du contrat'] || "",
+                        type: contractRec.fields['Type de contrat'] || "Contrat Cadre",
+                        totalVideos: contractRec.fields['Vidéos prévues'] || 0,
+                        deliveredVideos: contractRec.fields['Vidéos livrées'] || 0,
+                        startDate: contractRec.fields['Date de début'] || "",
+                        endDate: contractRec.fields['Date de fin'] || "",
+                        status: contractRec.fields['Statut du contrat'] || contractRec.fields['Statut contrat'] || "Actif",
+                        progressionPercent: contractRec.fields['Progression accomplissement du contrat %'] || 0,
+                        contractFileUrl: contractFile?.url || "",
+                        contractFileName: contractFile?.filename || "contrat.pdf"
+                    };
                 });
+                setContracts(mappedContracts);
             } else {
-                setContract(null);
+                setContracts([]);
             }
         } catch (err) {
             console.warn("Contract fetch failed", err);
-            setContract(null);
+            setContracts([]);
         }
 
         // 4. Fetch Videos
@@ -1005,6 +1043,28 @@ const App = () => {
       {/* 2. MAIN CONTENT */}
       <main className="flex-1 px-4 lg:px-8 pb-12 w-full max-w-5xl mx-auto space-y-8 -mt-12 relative z-10">
         
+        {/* REFRESH BAR */}
+        <div className="animate-in fade-in duration-500 flex items-center justify-between bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm border" style={{ borderColor: BRAND.coloredWhite }}>
+          <div className="flex items-center gap-2 text-xs" style={{ color: BRAND.lightBlue }}>
+            <Clock size={14} />
+            {lastRefresh ? (
+              <span>Mis à jour à {lastRefresh.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+            ) : (
+              <span>Données chargées</span>
+            )}
+            <span className="opacity-50">• Auto-refresh: 60s</span>
+          </div>
+          <button
+            onClick={() => refreshData(false)}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg hover:bg-[#F0F4FF] transition-colors disabled:opacity-50"
+            style={{ color: BRAND.blue }}
+          >
+            <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
+            {isRefreshing ? 'Actualisation...' : 'Actualiser'}
+          </button>
+        </div>
+
         {/* PROJECTS SECTION */}
         <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-forwards">
              <div className="flex items-center justify-between px-1 mb-3">
@@ -1027,12 +1087,22 @@ const App = () => {
             </div>
         </div>
 
-        {/* CONTRACT SECTION */}
-        <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500 fill-mode-forwards">
-            {contract ? (
-                <UnifiedContractSection contract={contract} />
+        {/* CONTRACTS SECTION - All contracts */}
+        <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500 fill-mode-forwards space-y-4">
+            <div className="flex items-center justify-between px-1 mb-1">
+                <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: BRAND.darkBlue }}>
+                    <FileText size={20} className="text-[#E53B46]" />
+                    Contrats ({contracts.length})
+                </h2>
+            </div>
+            {contracts.length > 0 ? (
+                contracts.map(contract => (
+                    <UnifiedContractSection key={contract.id} contract={contract} />
+                ))
             ) : (
-                <div className="bg-white p-8 rounded-xl border text-center opacity-60">Aucun contrat actif lié.</div>
+                <div className="bg-white p-8 rounded-xl border text-center opacity-60" style={{ borderColor: BRAND.coloredWhite }}>
+                    Aucun contrat actif lié.
+                </div>
             )}
         </div>
 
@@ -1048,32 +1118,7 @@ const App = () => {
         video={selectedVideo} 
         isOpen={!!selectedVideo} 
         onClose={() => setSelectedVideo(null)}
-        onVideoUpdated={() => {
-          // Rafraîchir les vidéos après une action
-          if (client) {
-            const safeCompanyName = client.companyName.replace(/'/g, "\\'");
-            const videoFormula = `FIND('${safeCompanyName}', ARRAYJOIN({Client (from Sessions de tournage)})) > 0`;
-            fetchAirtable(AIRTABLE_CONFIG.tables.videos, videoFormula)
-              .then((videoRes) => {
-                const mappedVideos: Video[] = videoRes.records.map((rec: any) => ({
-                  id: rec.id,
-                  title: rec.fields['Titre vidéo'] || "Sans titre",
-                  format: rec.fields['Format vidéo'] || "",
-                  language: rec.fields['Langue'] || "",
-                  status: rec.fields['Statut production'] || "📝 1. À brief",
-                  videoUrl: rec.fields['Lien Vidéo'] || rec.fields['Lien vidéo'] || "",
-                  driveUrl: rec.fields['Lien Drive'] || rec.fields['Lien drive'] || "",
-                  priority: rec.fields['Priorité'] || "",
-                  progress: rec.fields['% Avancement'] || 0,
-                  deadline: rec.fields['Deadline V1'] || "",
-                  invoiceNumber: rec.fields['N° Facture'] || "",
-                  rushUrl: rec.fields['Lien rushes'] || rec.fields['Lien Rushes'] || ""
-                }));
-                setVideos(mappedVideos);
-              })
-              .catch(console.error);
-          }
-        }}
+        onVideoUpdated={() => refreshData(false)}
       />
 
     </div>
