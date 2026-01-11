@@ -653,7 +653,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                   <div className="text-xs mb-3 font-medium" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
                   {/* Étapes de production */}
-                  <div className="relative flex items-start">
+                  <div className="flex items-center">
                     {[
                       { name: 'Brief', key: 'Brief' },
                       { name: 'Pré-prod', key: 'Pré-prod' },
@@ -669,9 +669,9 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                       const isCurrent = index === currentStepIndex;
                       
                       return (
-                        <div key={step.key} className="flex items-center flex-1">
+                        <React.Fragment key={step.key}>
                           {/* Numéro de l'étape */}
-                          <div className="flex flex-col items-center relative z-10">
+                          <div className="flex flex-col items-center relative">
                             <div 
                               className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
                                 isComplete ? 'text-white' : 
@@ -696,14 +696,18 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                           
                           {/* Ligne de connexion */}
                           {index < array.length - 1 && (
-                            <div className={`flex-1 h-0.5 -mx-1 mb-6 transition-all ${
-                              isComplete ? '' : 'bg-gray-200'
-                            }`}
-                            style={{
-                              backgroundColor: isComplete ? BRAND.blue : undefined
-                            }} />
+                            <div 
+                              className={`flex-1 h-0.5 transition-all ${
+                                isComplete ? '' : 'bg-gray-200'
+                              }`}
+                              style={{
+                                backgroundColor: isComplete ? BRAND.blue : undefined,
+                                marginLeft: '4px',
+                                marginRight: '4px'
+                              }} 
+                            />
                           )}
-                        </div>
+                        </React.Fragment>
                       );
                     })}
                   </div>
