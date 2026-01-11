@@ -779,51 +779,53 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
 
             {/* Formulaire de modification */}
             {isInClientReview && feedbackType && (
-                        // Demande de modification - avec textarea
-                        <div className="space-y-4">
-                            <div className="p-4 rounded-xl border bg-amber-50 border-amber-200">
-                                <h4 className="font-semibold text-sm text-amber-900">
-                                    Demander des modifications
-                                </h4>
-                                <p className="text-xs mt-1 text-amber-700">
-                                    Décrivez précisément les modifications souhaitées
-                                </p>
-                            </div>
-                            <textarea 
-                                className="w-full h-28 p-4 rounded-xl border focus:ring-2 focus:border-transparent transition-all resize-none text-sm outline-none"
-                                style={{ 
-                                    borderColor: BRAND.coloredWhite,
-                                    color: BRAND.blue 
-                                }}
-                                placeholder="Ex: 00:12 - Modifier le titre&#10;00:45 - Musique trop forte..."
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                                autoFocus
-                            />
-                            
-                            <div className="flex gap-3">
-                                <button 
-                                    onClick={() => { setFeedbackType(null); setComment(""); }}
-                                    className="px-4 py-2 bg-white border rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-                                    style={{ borderColor: BRAND.coloredWhite, color: BRAND.blue }}
-                                >
-                                    Annuler
-                                </button>
-                                <button 
-                                    onClick={handleSubmitFeedback}
-                                    disabled={isSubmitting || !comment.trim()}
-                                    className="flex-1 py-2 px-4 text-white rounded-lg font-medium shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                    style={{ backgroundColor: BRAND.primaryCoral }}
-                                >
-                                    {isSubmitting ? (
-                                        <><Loader2 className="animate-spin" size={18} /> Envoi...</>
-                                    ) : (
-                                        <>Envoyer</>
-                                    )}
-                                </button>
-                            </div>
+                <div className="mt-6">
+                    <div className="h-px w-full mb-6" style={{ backgroundColor: BRAND.coloredWhite }}></div>
+                    
+                    {/* Demande de modification - avec textarea */}
+                    <div className="space-y-4">
+                        <div className="p-4 rounded-xl border bg-amber-50 border-amber-200">
+                            <h4 className="font-semibold text-sm text-amber-900">
+                                Demander des modifications
+                            </h4>
+                            <p className="text-xs mt-1 text-amber-700">
+                                Décrivez précisément les modifications souhaitées
+                            </p>
                         </div>
-                    )}
+                        <textarea 
+                            className="w-full h-28 p-4 rounded-xl border focus:ring-2 focus:border-transparent transition-all resize-none text-sm outline-none"
+                            style={{ 
+                                borderColor: BRAND.coloredWhite,
+                                color: BRAND.blue 
+                            }}
+                            placeholder="Ex: 00:12 - Modifier le titre&#10;00:45 - Musique trop forte..."
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            autoFocus
+                        />
+                        
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => { setFeedbackType(null); setComment(""); }}
+                                className="px-4 py-2 bg-white border rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                                style={{ borderColor: BRAND.coloredWhite, color: BRAND.blue }}
+                            >
+                                Annuler
+                            </button>
+                            <button 
+                                onClick={handleSubmitFeedback}
+                                disabled={isSubmitting || !comment.trim()}
+                                className="flex-1 py-2 px-4 text-white rounded-lg font-medium shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                style={{ backgroundColor: BRAND.primaryCoral }}
+                            >
+                                {isSubmitting ? (
+                                    <><Loader2 className="animate-spin" size={18} /> Envoi...</>
+                                ) : (
+                                    <>Envoyer</>
+                                )}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
