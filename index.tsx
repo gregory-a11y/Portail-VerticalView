@@ -648,10 +648,10 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                     {video.deadline && <span>• Deadline: {new Date(video.deadline).toLocaleDateString('fr-FR')}</span>}
                 </div>
                 
-                {/* Barre de progression */}
+                {/* Barre de progression des étapes */}
                 <div className="mt-4">
                   <div className="flex items-center justify-between text-xs mb-2" style={{ color: BRAND.lightBlue }}>
-                    <span className="font-medium">Avancement</span>
+                    <span className="font-medium">Avancement du projet</span>
                     <span className="font-semibold" style={{ color: BRAND.darkBlue }}>{Math.round(video.progress * 100)}%</span>
                   </div>
                   <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#F0F4FF" }}>
