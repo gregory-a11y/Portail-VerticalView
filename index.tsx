@@ -1059,7 +1059,7 @@ const App = () => {
 
         // 4. Fetch Videos
         try {
-            const videoFormula = `FIND('${safeCompanyName}', ARRAYJOIN({Client (from Sessions de tournage)})) > 0`;
+            const videoFormula = `FIND('${safeCompanyName}', ARRAYJOIN({Lien client vidéo})) > 0`;
             const videoRes = await fetchAirtable(AIRTABLE_CONFIG.tables.videos, videoFormula);
             
             const mappedVideos: Video[] = videoRes.records.map((rec: any) => {
