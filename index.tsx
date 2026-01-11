@@ -50,7 +50,7 @@ const BRAND = {
 
 // --- TYPES ---
 
-type Status = "📝 1. À brief" | "📋 2. Pré-prod" | "✂️ 3. Post-production" | "📨 4. Review Client" | "🔁 5. Revision Interne" | "☑️ 6. Validé par le client" | "📦 7. Livrée" | "🗄️ 8. Archivée";
+type Status = "📝 1. À brief" | "📋 2. Pré-prod" | "✂️ 3. Post-production" | "✏️4. Review Client" | "🔁 5. Revision Interne" | "☑️ 6. Validé par le client" | "📦 7. Livrée" | "🗄️ 8. Archivée";
 
 interface Client {
   id: string;
