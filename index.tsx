@@ -9,6 +9,7 @@ import {
   Phone, 
   Mail, 
   ChevronRight,
+  ChevronDown,
   ListVideo,
   X,
   ArrowUpRight,
@@ -630,7 +631,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
         
         {/* Header */}
         <div className="p-6 border-b flex justify-between items-start shrink-0" style={{ borderColor: BRAND.coloredWhite }}>
-            <div>
+            <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                     <StatusIcon status={video.status} />
                     <span className="px-2 py-1 text-xs font-semibold rounded-full" style={{ 
@@ -646,8 +647,25 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                     {video.language && <span>• {video.language}</span>}
                     {video.deadline && <span>• Deadline: {new Date(video.deadline).toLocaleDateString('fr-FR')}</span>}
                 </div>
+                
+                {/* Barre de progression */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between text-xs mb-2" style={{ color: BRAND.lightBlue }}>
+                    <span className="font-medium">Avancement</span>
+                    <span className="font-semibold" style={{ color: BRAND.darkBlue }}>{Math.round(video.progress * 100)}%</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full overflow-hidden" style={{ backgroundColor: "#F0F4FF" }}>
+                    <div 
+                      className="h-full transition-all duration-500 ease-out"
+                      style={{ 
+                        width: `${video.progress * 100}%`,
+                        backgroundColor: isDelivered || isValidated ? BRAND.success : isInClientReview || isInInternalReview ? BRAND.warning : BRAND.blue
+                      }}
+                    />
+                  </div>
+                </div>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-[#F4F6FA] rounded-full transition-colors" style={{ color: BRAND.lightBlue }}>
+            <button onClick={onClose} className="p-2 hover:bg-[#F4F6FA] rounded-full transition-colors ml-4" style={{ color: BRAND.lightBlue }}>
                 <X />
             </button>
         </div>
@@ -662,45 +680,105 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
               <VideoLinks />
             </div>
 
-            {/* Section spécifique selon le statut */}
-            {(isValidated || isDelivered) && (
-                <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600 mx-auto mb-3">
-                        <CheckCircle2 size={24} />
-                    </div>
-                    <h3 className="font-semibold text-emerald-900">
-                        {isDelivered ? "Vidéo livrée !" : "Vidéo validée !"}
-                    </h3>
-                    <p className="text-sm text-emerald-700 mt-1">
-                        {isDelivered ? "Cette vidéo a été livrée avec succès." : "Cette vidéo a été approuvée et est prête."}
-                    </p>
+            {/* Section spécifique selon le statut - Messages pour TOUS les statuts */}
+            <div className="mt-6">
+              {/* Brief reçu */}
+              {video.status.includes("Brief") && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <h3 className="font-semibold" style={{ color: BRAND.darkBlue }}>Brief en cours de traitement</h3>
+                  <p className="text-sm mt-1" style={{ color: BRAND.blue }}>
+                    L'équipe Vertical View analyse votre brief et prépare la stratégie de production.
+                  </p>
                 </div>
-            )}
-
-            {isInInternalReview && (
-                <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-xl text-center">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-100 text-purple-600 mx-auto mb-3">
-                        <Clock size={24} />
-                    </div>
-                    <h3 className="font-semibold text-purple-900">Révision interne en cours</h3>
-                    <p className="text-sm text-purple-700 mt-1">
-                        L'équipe Vertical View finalise la vidéo. Vous serez notifié dès qu'elle sera prête pour validation.
-                    </p>
+              )}
+              
+              {/* Pré-production */}
+              {(video.status.includes("Pré-prod") || video.status.includes("Pré-production")) && (
+                <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+                  <h3 className="font-semibold text-indigo-900">Phase de pré-production</h3>
+                  <p className="text-sm text-indigo-700 mt-1">
+                    Préparation du tournage : storyboard, planning, et logistique en cours.
+                  </p>
                 </div>
-            )}
+              )}
+              
+              {/* Tournage planifié */}
+              {video.status.includes("Tournage") && (
+                <div className="p-4 bg-cyan-50 border border-cyan-200 rounded-xl">
+                  <h3 className="font-semibold text-cyan-900">Tournage planifié</h3>
+                  <p className="text-sm text-cyan-700 mt-1">
+                    Le tournage est programmé. L'équipe capturera bientôt les images nécessaires.
+                  </p>
+                </div>
+              )}
+              
+              {/* Post-production */}
+              {video.status.includes("Post-production") && (
+                <div className="p-4 border rounded-xl" style={{ backgroundColor: "#F0F4FF", borderColor: BRAND.coloredWhite }}>
+                  <h3 className="font-semibold" style={{ color: BRAND.darkBlue }}>Montage en cours</h3>
+                  <p className="text-sm mt-1" style={{ color: BRAND.blue }}>
+                    Nos monteurs travaillent sur votre vidéo. Elle sera bientôt prête pour validation.
+                  </p>
+                </div>
+              )}
+              
+              {/* Révision interne */}
+              {isInInternalReview && (
+                <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                  <h3 className="font-semibold text-purple-900">Révision interne en cours</h3>
+                  <p className="text-sm text-purple-700 mt-1">
+                    L'équipe Vertical View finalise la vidéo. Vous serez notifié dès qu'elle sera prête pour validation.
+                  </p>
+                </div>
+              )}
+              
+              {/* Review Client */}
+              {isInClientReview && !feedbackType && (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                  <h3 className="font-semibold text-amber-900 mb-2">Votre avis est requis</h3>
+                  <p className="text-sm text-amber-700">
+                    Visionnez la vidéo ci-dessus et donnez votre feedback.
+                  </p>
+                </div>
+              )}
+              
+              {/* Validé */}
+              {isValidated && (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600">
+                      <CheckCircle2 size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-emerald-900">Vidéo validée !</h3>
+                      <p className="text-sm text-emerald-700 mt-0.5">
+                        Cette vidéo a été approuvée et est prête pour livraison.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Livrée */}
+              {isDelivered && (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600">
+                      <CheckCircle2 size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-emerald-900">Vidéo livrée !</h3>
+                      <p className="text-sm text-emerald-700 mt-0.5">
+                        Cette vidéo a été livrée avec succès. Merci pour votre confiance !
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-            {isInClientReview && (
-                <div className="mt-6">
-                    <div className="h-px w-full mb-6" style={{ backgroundColor: BRAND.coloredWhite }}></div>
-                    
-                    {!feedbackType ? (
-                        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-center">
-                            <h3 className="font-semibold text-amber-900 mb-2">Votre avis est requis</h3>
-                            <p className="text-sm text-amber-700">
-                                Visionnez la vidéo ci-dessus et donnez votre feedback.
-                            </p>
-                        </div>
-                    ) : (
+            {/* Formulaire de modification */}
+            {isInClientReview && feedbackType && (
                         // Demande de modification - avec textarea
                         <div className="space-y-4">
                             <div className="p-4 rounded-xl border bg-amber-50 border-amber-200">
@@ -815,6 +893,7 @@ const App = () => {
   
   // Pagination pour l'historique
   const [historyLimit, setHistoryLimit] = useState(5);
+  const [historyExpanded, setHistoryExpanded] = useState(false);
 
   // Check for Magic Link (supports ?ref= or ?client=)
   useEffect(() => {
@@ -1106,31 +1185,45 @@ const App = () => {
                 )}
             </div>
             
-            {/* Historique */}
+            {/* Historique - Section repliable */}
             {deliveredVideos.length > 0 && (
               <div className="mt-6">
-                <div className="flex items-center justify-between px-1 mb-3">
-                    <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: BRAND.darkBlue }}>
-                        <CheckCircle2 size={20} className="text-emerald-500" />
-                        Historique ({deliveredVideos.length})
-                    </h2>
-                </div>
+                <button
+                  onClick={() => setHistoryExpanded(!historyExpanded)}
+                  className="w-full flex items-center justify-between px-1 mb-3 hover:opacity-70 transition-opacity"
+                >
+                  <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: BRAND.darkBlue }}>
+                      <CheckCircle2 size={20} className="text-emerald-500" />
+                      Historique ({deliveredVideos.length})
+                  </h2>
+                  <div className="flex items-center gap-2 text-sm" style={{ color: BRAND.lightBlue }}>
+                    <span>{historyExpanded ? 'Masquer' : 'Afficher'}</span>
+                    <ChevronDown 
+                      size={20} 
+                      className={`transform transition-transform ${historyExpanded ? 'rotate-180' : ''}`}
+                    />
+                  </div>
+                </button>
                 
-                <div className="bg-white rounded-xl overflow-hidden shadow-sm border" style={{ borderColor: BRAND.coloredWhite }}>
-                    {deliveredVideos.slice(0, historyLimit).map(video => (
-                        <VideoRow key={video.id} video={video} onOpen={setSelectedVideo} />
-                    ))}
-                </div>
-                
-                {/* Bouton charger plus */}
-                {deliveredVideos.length > historyLimit && (
-                  <button
-                    onClick={() => setHistoryLimit(prev => prev + 5)}
-                    className="w-full mt-3 py-3 px-4 bg-white border rounded-xl text-sm font-medium hover:bg-[#F8FBFF] transition-colors flex items-center justify-center gap-2"
-                    style={{ borderColor: BRAND.coloredWhite, color: BRAND.blue }}
-                  >
-                    Voir plus ({deliveredVideos.length - historyLimit} restantes)
-                  </button>
+                {historyExpanded && (
+                  <>
+                    <div className="bg-white rounded-xl overflow-hidden shadow-sm border" style={{ borderColor: BRAND.coloredWhite }}>
+                        {deliveredVideos.slice(0, historyLimit).map(video => (
+                            <VideoRow key={video.id} video={video} onOpen={setSelectedVideo} />
+                        ))}
+                    </div>
+                    
+                    {/* Bouton charger plus */}
+                    {deliveredVideos.length > historyLimit && (
+                      <button
+                        onClick={() => setHistoryLimit(prev => prev + 5)}
+                        className="w-full mt-3 py-3 px-4 bg-white border rounded-xl text-sm font-medium hover:bg-[#F8FBFF] transition-colors flex items-center justify-center gap-2"
+                        style={{ borderColor: BRAND.coloredWhite, color: BRAND.blue }}
+                      >
+                        Voir plus ({deliveredVideos.length - historyLimit} restantes)
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             )}
