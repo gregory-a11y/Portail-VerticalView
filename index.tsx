@@ -1004,10 +1004,24 @@ const App = () => {
     .filter(v => !v.status.includes("Livrée") && !v.status.includes("Archivée"))
     .sort((a, b) => getStatusPriority(a.status) - getStatusPriority(b.status));
   
-  // Vidéos livrées pour l'historique
-  const deliveredVideos = videos.filter(v => 
-    v.status.includes("Livrée") || v.status.includes("Archivée")
-  );
+  // Vidéos livrées pour l'historique (triées par deadline, filtrées à 1 mois max)
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  
+  const deliveredVideos = videos
+    .filter(v => v.status.includes("Livrée") || v.status.includes("Archivée"))
+    .filter(v => {
+      // Garder seulement les vidéos avec deadline de moins d'un mois
+      if (!v.deadline) return true; // Garder si pas de deadline
+      const deadlineDate = new Date(v.deadline);
+      return deadlineDate >= oneMonthAgo;
+    })
+    .sort((a, b) => {
+      // Trier par deadline décroissant (plus récent en haut)
+      const dateA = a.deadline ? new Date(a.deadline).getTime() : 0;
+      const dateB = b.deadline ? new Date(b.deadline).getTime() : 0;
+      return dateB - dateA;
+    });
 
   return (
     <div className="min-h-screen font-sans flex flex-col" style={{ backgroundColor: BRAND.bgLight }}>
