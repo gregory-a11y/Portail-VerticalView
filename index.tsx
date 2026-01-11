@@ -524,25 +524,6 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
           </a>
         )}
 
-        {video.rushUrl && (
-          <a 
-            href={video.rushUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-3 p-4 border rounded-xl hover:bg-[#F8FBFF] hover:border-[#122755] transition-all group"
-            style={{ borderColor: BRAND.coloredWhite }}
-          >
-            <div className="p-2 bg-[#122755] rounded-lg text-white shrink-0">
-              <FileVideo size={20} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm" style={{ color: BRAND.darkBlue }}>Rush / Brut</p>
-              <p className="text-xs opacity-60 break-all" style={{ color: BRAND.blue }}>{video.rushUrl}</p>
-            </div>
-            <ArrowUpRight size={18} className="shrink-0 mt-1" style={{ color: BRAND.blue }} />
-          </a>
-        )}
-
         {video.driveUrl && (
           <a 
             href={video.driveUrl}
@@ -562,7 +543,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
           </a>
         )}
 
-        {!video.videoUrl && !video.rushUrl && !video.driveUrl && (
+        {!video.videoUrl && !video.driveUrl && (
           <div className="p-4 border rounded-xl text-center opacity-60" style={{ borderColor: BRAND.coloredWhite }}>
             <p className="text-sm" style={{ color: BRAND.blue }}>Aucun lien disponible pour le moment</p>
           </div>
@@ -737,68 +718,6 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
   );
 };
 
-const LoginView = ({ onLogin, loading, error }: { onLogin: (email: string) => void, loading: boolean, error: string | null }) => {
-    const [email, setEmail] = useState("");
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onLogin(email);
-    }
-
-    return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ backgroundColor: BRAND.bgLight }}>
-            {/* Decoration */}
-            <div className="absolute top-0 left-0 w-full h-64 bg-[#02143B] skew-y-3 transform -translate-y-20 z-0"></div>
-
-            <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border" style={{ borderColor: BRAND.coloredWhite }}>
-                <div className="flex justify-center mb-8">
-                    <img 
-                        src="https://raw.githubusercontent.com/gregory-a11y/image/main/logo%20(4).png" 
-                        alt="Vertical View" 
-                        className="h-10 w-auto object-contain"
-                    />
-                </div>
-                
-                <h2 className="text-2xl font-bold text-center mb-2" style={{ color: BRAND.darkBlue }}>Portail Client</h2>
-                <p className="text-center text-sm mb-8 opacity-70" style={{ color: BRAND.blue }}>Connectez-vous pour suivre vos productions.</p>
-
-                {error && (
-                    <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center gap-2">
-                        <AlertTriangle size={16} /> {error}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-bold uppercase mb-2 ml-1" style={{ color: BRAND.lightBlue }}>Email professionnel</label>
-                        <input 
-                            type="email" 
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:outline-none transition-all"
-                            style={{ borderColor: BRAND.coloredWhite, outlineColor: BRAND.primaryCoral }}
-                            placeholder="vous@entreprise.com"
-                        />
-                    </div>
-                    <button 
-                        disabled={loading}
-                        type="submit" 
-                        className="w-full py-3 rounded-lg text-white font-bold transition-all flex items-center justify-center gap-2 hover:shadow-lg disabled:opacity-70"
-                        style={{ backgroundColor: BRAND.primaryCoral }}
-                    >
-                        {loading ? <Loader2 className="animate-spin" /> : <>Se connecter <LogIn size={18}/></>}
-                    </button>
-                </form>
-
-                <div className="mt-8 pt-6 border-t text-center text-xs opacity-50" style={{ color: BRAND.blue, borderColor: BRAND.coloredWhite }}>
-                    Protégé par Vertical View Secure Access
-                </div>
-            </div>
-        </div>
-    )
-}
-
 // --- MAIN APP ---
 
 const App = () => {
@@ -968,26 +887,24 @@ const App = () => {
       fetchClientData(recordId);
   };
 
-  const handleEmailLogin = async (email: string) => {
-      setLoading(true);
-      setError(null);
-      try {
-        // Find client ID by email using the specific field name
-        const res = await fetchAirtable(AIRTABLE_CONFIG.tables.clients, `{Email contact principal}='${email}'`);
-        if (res.records.length === 0) {
-            throw new Error("Aucun compte trouvé avec cet email.");
-        }
-        const recordId = res.records[0].id;
-        // Proceed to fetch data
-        fetchClientData(recordId);
-      } catch (err: any) {
-          setError(err.message);
-          setLoading(false);
-      }
-  };
-
-  if (view === 'login') {
-      return <LoginView onLogin={handleEmailLogin} loading={loading} error={error} />;
+  // Si pas de client chargé et pas en cours de chargement, afficher message d'erreur
+  if (view === 'login' && !loading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: BRAND.bgLight }}>
+          <div className="text-center max-w-md">
+            <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
+              <AlertTriangle size={40} className="text-red-500" />
+            </div>
+            <h1 className="text-2xl font-bold mb-3" style={{ color: BRAND.darkBlue }}>Accès non autorisé</h1>
+            <p className="text-base mb-6" style={{ color: BRAND.blue }}>
+              Ce portail est accessible uniquement via un lien personnalisé fourni par Vertical View.
+            </p>
+            <p className="text-sm opacity-60" style={{ color: BRAND.lightBlue }}>
+              Si vous êtes client, contactez votre chargé de compte pour obtenir votre lien d'accès.
+            </p>
+          </div>
+        </div>
+      );
   }
 
   if (!client) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-[#E53B46]" size={40}/></div>;
