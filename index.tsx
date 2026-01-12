@@ -1165,31 +1165,13 @@ const App = () => {
       {/* 1. HEADER SECTION */}
       <div className="w-full bg-white pt-12 pb-24 px-6 flex flex-col items-center justify-center text-center relative z-0 border-b" style={{ borderColor: BRAND.coloredWhite }}>
           
-          <div className="flex items-center justify-center gap-8 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-forwards">
+          <div className="flex items-center justify-center mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-forwards">
              <div className="p-2">
                  <img 
                     src="https://raw.githubusercontent.com/gregory-a11y/image/main/logo%20(4).png" 
                     alt="Vertical View" 
-                    className="h-14 w-auto object-contain"
+                    className="h-12 w-auto object-contain"
                  />
-             </div>
-
-             <div style={{ color: BRAND.darkBlue }}>
-                 <X size={24} strokeWidth={3} />
-             </div>
-
-             <div className="bg-white p-2">
-                 {client.logoUrl ? (
-                    <img 
-                        src={client.logoUrl} 
-                        alt={client.companyName} 
-                        className="h-14 w-auto object-contain"
-                    />
-                 ) : (
-                    <div className="h-14 w-14 bg-gray-100 rounded-full flex items-center justify-center text-xl font-bold text-gray-400">
-                        {client.companyName.charAt(0)}
-                    </div>
-                 )}
              </div>
           </div>
 
