@@ -51,7 +51,7 @@ const BRAND = {
 
 // --- TYPES ---
 
-type Status = "📝 1. À brief" | "📋 2. Pré-prod" | "✂️ 3. Post-production" | "✏️4. Review Client" | "🔁 5. Revision Interne" | "☑️ 6. Validé par le client" | "📦 7. Livrée" | "🗄️ 8. Archivée";
+type Status = "📝 1. À brief" | "📋 2. Pré-prod" | "✂️ 3. Post-production" | "📨 4. Review Client" | "✏️4. Review Client" | "🔁 5. Revision Interne" | "☑️ 6. Validé par le client" | "📦 7. Livrée" | "🗄️ 8. Archivée";
 
 interface Client {
   id: string;
@@ -576,7 +576,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
   const VideoLinks = () => (
     <div className="space-y-3">
       <h4 className="text-xs font-bold uppercase tracking-wider opacity-60" style={{ color: BRAND.blue }}>
-        Liens de la vidéo
+        Lien du drive
       </h4>
       <div className="grid grid-cols-1 gap-3">
         {/* Lien vers le Drive Session de la vidéo */}
@@ -599,26 +599,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
           </a>
         )}
 
-        {video.driveUrl && (
-          <a 
-            href={video.driveUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-3 p-4 border rounded-xl hover:bg-[#F8FBFF] hover:border-[#122755] transition-all group"
-            style={{ borderColor: BRAND.coloredWhite }}
-          >
-            <div className="p-2 bg-[#F0F4FF] rounded-lg shrink-0" style={{ color: BRAND.blue }}>
-              <FolderOpen size={20} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm" style={{ color: BRAND.darkBlue }}>Fichiers Drive</p>
-              <p className="text-xs opacity-60 break-all" style={{ color: BRAND.blue }}>{video.driveUrl}</p>
-            </div>
-            <ArrowUpRight size={18} className="shrink-0 mt-1" style={{ color: BRAND.blue }} />
-          </a>
-        )}
-
-        {!video.driveSessionUrl && !video.driveUrl && (
+        {!video.driveSessionUrl && (
           <div className="p-4 border rounded-xl text-center opacity-60" style={{ borderColor: BRAND.coloredWhite }}>
             <p className="text-sm" style={{ color: BRAND.blue }}>Aucun lien disponible pour le moment</p>
           </div>
@@ -652,11 +633,11 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 </div>
                 
                 {/* Barre de progression par étapes */}
-                <div className="mt-4 px-4">
+                <div className="mt-4">
                   <div className="text-xs mb-3 font-medium" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
                   {/* Étapes de production */}
-                  <div className="flex items-center justify-between max-w-full">
+                  <div className="flex items-center">
                     {[
                       { name: 'Brief', key: 'Brief' },
                       { name: 'Pré-prod', key: 'Pré-prod' },
@@ -674,7 +655,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                       return (
                         <React.Fragment key={step.key}>
                           {/* Numéro de l'étape */}
-                          <div className="flex flex-col items-center relative z-10">
+                          <div className="flex flex-col items-center shrink-0">
                             <div 
                               className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
                                 isComplete ? 'text-white' : 
@@ -697,17 +678,15 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                             </div>
                           </div>
                           
-                          {/* Ligne de connexion - largeur égale entre chaque étape */}
+                          {/* Ligne de connexion */}
                           {index < array.length - 1 && (
                             <div 
-                              className={`h-0.5 transition-all ${
+                              className={`flex-1 h-0.5 transition-all ${
                                 isComplete ? '' : 'bg-gray-200'
                               }`}
                               style={{
                                 backgroundColor: isComplete ? BRAND.blue : undefined,
-                                flex: '1 1 0',
-                                margin: '0 4px 32px 4px',
-                                minWidth: '16px'
+                                margin: '0 6px 32px 6px'
                               }} 
                             />
                           )}
@@ -1072,7 +1051,7 @@ const App = () => {
                     status: rec.fields['Statut production'] || "📝 1. À brief",
                     videoUrl: rec.fields['Lien Vidéo'] || rec.fields['Lien vidéo'] || rec.fields['Lien Video'] || "",
                     driveUrl: rec.fields['Lien Drive'] || rec.fields['Lien drive'] || "",
-                    driveSessionUrl: rec.fields['Lien drive session'] || "",
+                    driveSessionUrl: rec.fields['Lien Drive Session']?.[0] || rec.fields['Lien drive session']?.[0] || "",
                     priority: rec.fields['Priorité'] || "",
                     progress: rec.fields['% Avancement'] || 0,
                     deadline: rec.fields['Deadline V1'] || "",
