@@ -636,13 +636,13 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 <div className="mt-4">
                   <div className="text-xs mb-3 font-medium text-center" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
-                  {/* Étapes de production */}
-                  <div className="relative px-2">
+                  {/* Étapes de production avec grid pour espacement égal */}
+                  <div className="relative">
                     {/* Ligne de fond */}
-                    <div className="absolute top-[18px] left-6 right-6 h-0.5 bg-gray-200"></div>
+                    <div className="absolute top-[18px] left-[18px] right-[18px] h-0.5 bg-gray-200"></div>
                     
-                    {/* Étapes */}
-                    <div className="relative flex justify-between">
+                    {/* Étapes en grid */}
+                    <div className="grid grid-cols-7 gap-0">
                       {[
                         { name: 'Brief', key: 'Brief' },
                         { name: 'Pré-prod', key: 'Pré-prod' },
@@ -659,7 +659,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                         return (
                           <div key={step.key} className="flex flex-col items-center">
                             <div 
-                              className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold z-10 ${
+                              className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold relative z-10 ${
                                 isComplete ? 'text-white' : 
                                 isCurrent ? 'text-white ring-4 ring-blue-100' : 
                                 'bg-gray-200 text-gray-400'
