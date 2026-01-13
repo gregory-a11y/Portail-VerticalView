@@ -85,6 +85,7 @@ interface Video {
   status: Status;
   videoUrl: string;
   driveUrl: string;
+  driveSessionUrl?: string;
   priority: string;
   progress: number;
   deadline: string;
@@ -578,10 +579,10 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
         Liens de la vidéo
       </h4>
       <div className="grid grid-cols-1 gap-3">
-        {/* Lien vers le Drive Tournage du client */}
-        {client.driveTournage && (
+        {/* Lien vers le Drive Session de la vidéo */}
+        {video.driveSessionUrl && (
           <a 
-            href={client.driveTournage}
+            href={video.driveSessionUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-start gap-3 p-4 border rounded-xl hover:bg-[#F8FBFF] hover:border-[#122755] transition-all group"
@@ -591,29 +592,10 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
               <FolderOpen size={20} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm" style={{ color: BRAND.darkBlue }}>Drive Tournage</p>
-              <p className="text-xs opacity-60 break-all" style={{ color: BRAND.blue }}>{client.driveTournage}</p>
+              <p className="font-semibold text-sm" style={{ color: BRAND.darkBlue }}>Drive Session</p>
+              <p className="text-xs opacity-60 break-all" style={{ color: BRAND.blue }}>{video.driveSessionUrl}</p>
             </div>
             <ArrowUpRight size={18} className="shrink-0 mt-1" style={{ color: BRAND.blue }} />
-          </a>
-        )}
-        
-        {video.videoUrl && (
-          <a 
-            href={video.videoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-3 p-4 border rounded-xl hover:bg-[#F8FBFF] hover:border-[#E53B46] transition-all group"
-            style={{ borderColor: BRAND.coloredWhite }}
-          >
-            <div className="p-2 bg-[#E53B46] rounded-lg text-white shrink-0">
-              <Play size={20} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm" style={{ color: BRAND.darkBlue }}>Voir la vidéo</p>
-              <p className="text-xs opacity-60 break-all" style={{ color: BRAND.blue }}>{video.videoUrl}</p>
-            </div>
-            <ArrowUpRight size={18} className="shrink-0 mt-1" style={{ color: BRAND.primaryCoral }} />
           </a>
         )}
 
@@ -636,7 +618,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
           </a>
         )}
 
-        {!video.videoUrl && !video.driveUrl && (
+        {!video.driveSessionUrl && !video.driveUrl && (
           <div className="p-4 border rounded-xl text-center opacity-60" style={{ borderColor: BRAND.coloredWhite }}>
             <p className="text-sm" style={{ color: BRAND.blue }}>Aucun lien disponible pour le moment</p>
           </div>
@@ -670,11 +652,11 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 </div>
                 
                 {/* Barre de progression par étapes */}
-                <div className="mt-4">
+                <div className="mt-4 px-4">
                   <div className="text-xs mb-3 font-medium" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
                   {/* Étapes de production */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between max-w-full">
                     {[
                       { name: 'Brief', key: 'Brief' },
                       { name: 'Pré-prod', key: 'Pré-prod' },
@@ -724,7 +706,8 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                               style={{
                                 backgroundColor: isComplete ? BRAND.blue : undefined,
                                 flex: '1 1 0',
-                                margin: '0 8px 32px 8px'
+                                margin: '0 4px 32px 4px',
+                                minWidth: '16px'
                               }} 
                             />
                           )}
@@ -1089,6 +1072,7 @@ const App = () => {
                     status: rec.fields['Statut production'] || "📝 1. À brief",
                     videoUrl: rec.fields['Lien Vidéo'] || rec.fields['Lien vidéo'] || rec.fields['Lien Video'] || "",
                     driveUrl: rec.fields['Lien Drive'] || rec.fields['Lien drive'] || "",
+                    driveSessionUrl: rec.fields['Lien drive session'] || "",
                     priority: rec.fields['Priorité'] || "",
                     progress: rec.fields['% Avancement'] || 0,
                     deadline: rec.fields['Deadline V1'] || "",
