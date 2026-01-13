@@ -60,6 +60,7 @@ interface Client {
   email: string;
   status: string;
   type: string;
+  driveTournage?: string;
 }
 
 interface Contract {
@@ -428,7 +429,7 @@ const ContactFooter = ({ client, teamMembers }: { client: Client, teamMembers: T
     )
 }
 
-const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video | null, isOpen: boolean, onClose: () => void, onVideoUpdated?: () => void }) => {
+const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video: Video | null, isOpen: boolean, onClose: () => void, onVideoUpdated?: () => void, client: Client }) => {
   const [comment, setComment] = useState("");
   const [feedbackType, setFeedbackType] = useState<'validation' | 'modification' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -577,6 +578,26 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
         Liens de la vidéo
       </h4>
       <div className="grid grid-cols-1 gap-3">
+        {/* Lien vers le Drive Tournage du client */}
+        {client.driveTournage && (
+          <a 
+            href={client.driveTournage}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-start gap-3 p-4 border rounded-xl hover:bg-[#F8FBFF] hover:border-[#122755] transition-all group"
+            style={{ borderColor: BRAND.coloredWhite }}
+          >
+            <div className="p-2 bg-[#F0F4FF] rounded-lg shrink-0" style={{ color: BRAND.blue }}>
+              <FolderOpen size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm" style={{ color: BRAND.darkBlue }}>Drive Tournage</p>
+              <p className="text-xs opacity-60 break-all" style={{ color: BRAND.blue }}>{client.driveTournage}</p>
+            </div>
+            <ArrowUpRight size={18} className="shrink-0 mt-1" style={{ color: BRAND.blue }} />
+          </a>
+        )}
+        
         {video.videoUrl && (
           <a 
             href={video.videoUrl}
@@ -653,7 +674,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                   <div className="text-xs mb-3 font-medium" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
                   {/* Étapes de production */}
-                  <div className="relative flex justify-between items-start">
+                  <div className="flex items-center justify-between">
                     {[
                       { name: 'Brief', key: 'Brief' },
                       { name: 'Pré-prod', key: 'Pré-prod' },
@@ -669,9 +690,9 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                       const isCurrent = index === currentStepIndex;
                       
                       return (
-                        <div key={step.key} className="flex flex-col items-center relative" style={{ flex: index < array.length - 1 ? '1' : '0' }}>
+                        <React.Fragment key={step.key}>
                           {/* Numéro de l'étape */}
-                          <div className="relative z-10">
+                          <div className="flex flex-col items-center relative z-10">
                             <div 
                               className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
                                 isComplete ? 'text-white' : 
@@ -684,34 +705,30 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated }: { video: Video |
                             >
                               {isComplete ? '✓' : index + 1}
                             </div>
+                            <div className={`text-[10px] mt-2 font-medium whitespace-nowrap text-center ${
+                              isComplete || isCurrent ? '' : 'text-gray-400'
+                            }`}
+                            style={{
+                              color: isComplete || isCurrent ? BRAND.blue : undefined
+                            }}>
+                              {step.name}
+                            </div>
                           </div>
                           
-                          <div className={`text-[10px] mt-2 font-medium whitespace-nowrap text-center ${
-                            isComplete || isCurrent ? '' : 'text-gray-400'
-                          }`}
-                          style={{
-                            color: isComplete || isCurrent ? BRAND.blue : undefined
-                          }}>
-                            {step.name}
-                          </div>
-                          
-                          {/* Ligne de connexion - positionnée au centre du cercle */}
+                          {/* Ligne de connexion - largeur égale entre chaque étape */}
                           {index < array.length - 1 && (
                             <div 
-                              className={`absolute h-0.5 transition-all ${
+                              className={`h-0.5 transition-all ${
                                 isComplete ? '' : 'bg-gray-200'
                               }`}
                               style={{
                                 backgroundColor: isComplete ? BRAND.blue : undefined,
-                                top: '18px', // Centre du cercle (9px de rayon + 9px)
-                                left: '50%',
-                                right: '-50%',
-                                width: 'calc(100% - 18px)',
-                                marginLeft: '9px'
+                                flex: '1 1 0',
+                                margin: '0 8px 32px 8px'
                               }} 
                             />
                           )}
-                        </div>
+                        </React.Fragment>
                       );
                     })}
                   </div>
@@ -1002,7 +1019,8 @@ const App = () => {
             logoUrl: clientRec.fields['Logo']?.[0]?.url || "",
             email: clientRec.fields['Email contact principal'] || "",
             status: clientRec.fields['Statut'] || "Actif",
-            type: clientRec.fields['Type de client'] || ""
+            type: clientRec.fields['Type de client'] || "",
+            driveTournage: clientRec.fields['Drive Tournage'] || ""
         };
         setClient(clientData);
 
@@ -1297,6 +1315,7 @@ const App = () => {
         isOpen={!!selectedVideo} 
         onClose={() => setSelectedVideo(null)}
         onVideoUpdated={() => refreshData(false)}
+        client={client}
       />
 
     </div>
