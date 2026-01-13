@@ -634,11 +634,15 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 
                 {/* Barre de progression par étapes */}
                 <div className="mt-4">
-                  <div className="text-xs mb-3 font-medium" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
+                  <div className="text-xs mb-3 font-medium text-center" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
-                  {/* Étapes de production - bien centrées */}
-                  <div className="flex items-center justify-center w-full">
-                    <div className="flex items-center w-full max-w-lg">
+                  {/* Étapes de production */}
+                  <div className="relative px-2">
+                    {/* Ligne de fond */}
+                    <div className="absolute top-[18px] left-6 right-6 h-0.5 bg-gray-200"></div>
+                    
+                    {/* Étapes */}
+                    <div className="relative flex justify-between">
                       {[
                         { name: 'Brief', key: 'Brief' },
                         { name: 'Pré-prod', key: 'Pré-prod' },
@@ -648,51 +652,33 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                         { name: 'Validé', key: 'Validé' },
                         { name: 'Livré', key: 'Livrée' }
                       ].map((step, index, array) => {
-                        // Déterminer si cette étape est complète
                         const currentStepIndex = array.findIndex(s => video.status.includes(s.key));
                         const isComplete = index < currentStepIndex;
                         const isCurrent = index === currentStepIndex;
                         
                         return (
-                          <React.Fragment key={step.key}>
-                            {/* Numéro de l'étape */}
-                            <div className="flex flex-col items-center shrink-0">
-                              <div 
-                                className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
-                                  isComplete ? 'text-white' : 
-                                  isCurrent ? 'text-white ring-4 ring-blue-100' : 
-                                  'bg-gray-200 text-gray-400'
-                                }`}
-                                style={{
-                                  backgroundColor: isComplete || isCurrent ? BRAND.blue : undefined
-                                }}
-                              >
-                                {isComplete ? '✓' : index + 1}
-                              </div>
-                              <div className={`text-[10px] mt-2 font-medium whitespace-nowrap text-center ${
-                                isComplete || isCurrent ? '' : 'text-gray-400'
+                          <div key={step.key} className="flex flex-col items-center">
+                            <div 
+                              className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold z-10 ${
+                                isComplete ? 'text-white' : 
+                                isCurrent ? 'text-white ring-4 ring-blue-100' : 
+                                'bg-gray-200 text-gray-400'
                               }`}
                               style={{
-                                color: isComplete || isCurrent ? BRAND.blue : undefined
-                              }}>
-                                {step.name}
-                              </div>
+                                backgroundColor: isComplete || isCurrent ? BRAND.blue : undefined
+                              }}
+                            >
+                              {isComplete ? '✓' : index + 1}
                             </div>
-                            
-                            {/* Ligne de connexion */}
-                            {index < array.length - 1 && (
-                              <div 
-                                className={`flex-1 h-0.5 ${
-                                  isComplete ? '' : 'bg-gray-200'
-                                }`}
-                                style={{
-                                  backgroundColor: isComplete ? BRAND.blue : undefined,
-                                  margin: '0 4px 28px 4px',
-                                  minWidth: '20px'
-                                }} 
-                              />
-                            )}
-                          </React.Fragment>
+                            <div className={`text-[10px] mt-2 font-medium whitespace-nowrap ${
+                              isComplete || isCurrent ? '' : 'text-gray-400'
+                            }`}
+                            style={{
+                              color: isComplete || isCurrent ? BRAND.blue : undefined
+                            }}>
+                              {step.name}
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
