@@ -636,63 +636,66 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 <div className="mt-4">
                   <div className="text-xs mb-3 font-medium" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
-                  {/* Étapes de production */}
-                  <div className="flex items-center">
-                    {[
-                      { name: 'Brief', key: 'Brief' },
-                      { name: 'Pré-prod', key: 'Pré-prod' },
-                      { name: 'Tournage', key: 'Tournage' },
-                      { name: 'Post-prod', key: 'Post-production' },
-                      { name: 'Review', key: 'Review' },
-                      { name: 'Validé', key: 'Validé' },
-                      { name: 'Livré', key: 'Livrée' }
-                    ].map((step, index, array) => {
-                      // Déterminer si cette étape est complète
-                      const currentStepIndex = array.findIndex(s => video.status.includes(s.key));
-                      const isComplete = index < currentStepIndex;
-                      const isCurrent = index === currentStepIndex;
-                      
-                      return (
-                        <React.Fragment key={step.key}>
-                          {/* Numéro de l'étape */}
-                          <div className="flex flex-col items-center shrink-0">
-                            <div 
-                              className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
-                                isComplete ? 'text-white' : 
-                                isCurrent ? 'text-white ring-4 ring-blue-100' : 
-                                'bg-gray-200 text-gray-400'
+                  {/* Étapes de production - bien centrées */}
+                  <div className="flex items-center justify-center w-full">
+                    <div className="flex items-center w-full max-w-lg">
+                      {[
+                        { name: 'Brief', key: 'Brief' },
+                        { name: 'Pré-prod', key: 'Pré-prod' },
+                        { name: 'Tournage', key: 'Tournage' },
+                        { name: 'Post-prod', key: 'Post-production' },
+                        { name: 'Review', key: 'Review' },
+                        { name: 'Validé', key: 'Validé' },
+                        { name: 'Livré', key: 'Livrée' }
+                      ].map((step, index, array) => {
+                        // Déterminer si cette étape est complète
+                        const currentStepIndex = array.findIndex(s => video.status.includes(s.key));
+                        const isComplete = index < currentStepIndex;
+                        const isCurrent = index === currentStepIndex;
+                        
+                        return (
+                          <React.Fragment key={step.key}>
+                            {/* Numéro de l'étape */}
+                            <div className="flex flex-col items-center shrink-0">
+                              <div 
+                                className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
+                                  isComplete ? 'text-white' : 
+                                  isCurrent ? 'text-white ring-4 ring-blue-100' : 
+                                  'bg-gray-200 text-gray-400'
+                                }`}
+                                style={{
+                                  backgroundColor: isComplete || isCurrent ? BRAND.blue : undefined
+                                }}
+                              >
+                                {isComplete ? '✓' : index + 1}
+                              </div>
+                              <div className={`text-[10px] mt-2 font-medium whitespace-nowrap text-center ${
+                                isComplete || isCurrent ? '' : 'text-gray-400'
                               }`}
                               style={{
-                                backgroundColor: isComplete || isCurrent ? BRAND.blue : undefined
-                              }}
-                            >
-                              {isComplete ? '✓' : index + 1}
+                                color: isComplete || isCurrent ? BRAND.blue : undefined
+                              }}>
+                                {step.name}
+                              </div>
                             </div>
-                            <div className={`text-[10px] mt-2 font-medium whitespace-nowrap text-center ${
-                              isComplete || isCurrent ? '' : 'text-gray-400'
-                            }`}
-                            style={{
-                              color: isComplete || isCurrent ? BRAND.blue : undefined
-                            }}>
-                              {step.name}
-                            </div>
-                          </div>
-                          
-                          {/* Ligne de connexion */}
-                          {index < array.length - 1 && (
-                            <div 
-                              className={`flex-1 h-0.5 transition-all ${
-                                isComplete ? '' : 'bg-gray-200'
-                              }`}
-                              style={{
-                                backgroundColor: isComplete ? BRAND.blue : undefined,
-                                margin: '0 6px 32px 6px'
-                              }} 
-                            />
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
+                            
+                            {/* Ligne de connexion */}
+                            {index < array.length - 1 && (
+                              <div 
+                                className={`flex-1 h-0.5 ${
+                                  isComplete ? '' : 'bg-gray-200'
+                                }`}
+                                style={{
+                                  backgroundColor: isComplete ? BRAND.blue : undefined,
+                                  margin: '0 4px 28px 4px',
+                                  minWidth: '20px'
+                                }} 
+                              />
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
             </div>
@@ -1051,7 +1054,7 @@ const App = () => {
                     status: rec.fields['Statut production'] || "📝 1. À brief",
                     videoUrl: rec.fields['Lien Vidéo'] || rec.fields['Lien vidéo'] || rec.fields['Lien Video'] || "",
                     driveUrl: rec.fields['Lien Drive'] || rec.fields['Lien drive'] || "",
-                    driveSessionUrl: rec.fields['Lien Drive Session']?.[0] || rec.fields['Lien drive session']?.[0] || "",
+                    driveSessionUrl: rec.fields['Lien Drive Session (from Sessions de tournage)']?.[0] || "",
                     priority: rec.fields['Priorité'] || "",
                     progress: rec.fields['% Avancement'] || 0,
                     deadline: rec.fields['Deadline V1'] || "",
