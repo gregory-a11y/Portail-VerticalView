@@ -627,7 +627,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 </div>
                 
                 {/* Barre de progression par étapes */}
-                <div className="mt-4 px-8 md:px-8">
+                <div className="mt-4 pl-10 pr-4 md:px-8">
                   <div className="text-xs mb-2 md:mb-3 font-medium text-center" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
                   {/* Étapes de production - compact sur mobile */}
@@ -664,7 +664,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                             >
                               {isComplete ? '✓' : index + 1}
                             </div>
-                            <div className={`text-[7px] md:text-[10px] mt-1 md:mt-2 font-semibold whitespace-nowrap leading-tight ${
+                            <div className={`text-[8px] md:text-[10px] mt-1 md:mt-2 font-semibold whitespace-nowrap leading-tight ${
                               isComplete || isCurrent ? '' : 'text-gray-400'
                             }`}
                             style={{
