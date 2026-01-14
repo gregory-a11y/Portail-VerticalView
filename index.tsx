@@ -627,23 +627,23 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 </div>
                 
                 {/* Barre de progression par étapes */}
-                <div className="mt-4 px-2 md:px-8">
+                <div className="mt-4 px-3 md:px-8">
                   <div className="text-xs mb-2 md:mb-3 font-medium text-center" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
                   {/* Étapes de production - compact sur mobile */}
                   <div className="relative">
                     {/* Ligne de fond - centrée avec marges égales */}
-                    <div className="absolute top-[14px] md:top-[18px] h-0.5 bg-gray-200" style={{ left: '4%', right: '4%' }}></div>
+                    <div className="absolute top-[14px] md:top-[18px] h-0.5 bg-gray-200" style={{ left: '6%', right: '6%' }}></div>
                     
                     {/* Étapes en grid */}
                     <div className="grid grid-cols-7 gap-0">
                       {[
                         { name: 'Brief', mobileName: 'Brief', key: 'Brief' },
-                        { name: 'Pré-prod', mobileName: 'Pré-prod', key: 'Pré-prod' },
-                        { name: 'Tournage', mobileName: 'Tourne', key: 'Tournage' },
+                        { name: 'Pré-prod', mobileName: 'Prépro', key: 'Pré-prod' },
+                        { name: 'Tournage', mobileName: 'Tourn.', key: 'Tournage' },
                         { name: 'Post-prod', mobileName: 'Post', key: 'Post-production' },
-                        { name: 'Review', mobileName: 'Review', key: 'Review' },
-                        { name: 'Validé', mobileName: 'Validé', key: 'Validé' },
+                        { name: 'Review', mobileName: 'Rev.', key: 'Review' },
+                        { name: 'Validé', mobileName: 'Valid.', key: 'Validé' },
                         { name: 'Livré', mobileName: 'Livré', key: 'Livrée' }
                       ].map((step, index, array) => {
                         const currentStepIndex = array.findIndex(s => video.status.includes(s.key));
@@ -651,7 +651,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                         const isCurrent = index === currentStepIndex;
                         
                         return (
-                          <div key={step.key} className="flex flex-col items-center">
+                          <div key={step.key} className="flex flex-col items-center justify-start">
                             <div 
                               className={`w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center text-[9px] md:text-xs font-semibold relative z-10 ${
                                 isComplete ? 'text-white' : 
@@ -664,7 +664,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                             >
                               {isComplete ? '✓' : index + 1}
                             </div>
-                            <div className={`text-[7.5px] md:text-[10px] mt-1 md:mt-2 font-medium whitespace-nowrap ${
+                            <div className={`text-[7px] md:text-[10px] mt-1 md:mt-2 font-medium whitespace-nowrap leading-tight ${
                               isComplete || isCurrent ? '' : 'text-gray-400'
                             }`}
                             style={{
