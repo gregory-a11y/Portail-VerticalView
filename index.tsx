@@ -86,6 +86,7 @@ interface Video {
   videoUrl: string;
   driveUrl: string;
   driveSessionUrl?: string;
+  sessionDateTime?: string;
   priority: string;
   progress: number;
   deadline: string;
@@ -213,6 +214,8 @@ const VideoRow: React.FC<{ video: Video; onOpen: (v: Video) => void }> = ({ vide
           {video.format} {video.language && `• ${video.language}`}
           {video.deadline && <span className="mx-2 opacity-30">|</span>}
           {video.deadline && <span className="font-medium opacity-70">Deadline: {new Date(video.deadline).toLocaleDateString('fr-FR')}</span>}
+          {video.sessionDateTime && <span className="mx-2 opacity-30">|</span>}
+          {video.sessionDateTime && <span className="font-medium opacity-70">Session: {new Date(video.sessionDateTime).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>}
         </p>
       </div>
 
@@ -620,10 +623,11 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                     </span>
                 </div>
                 <h2 className="text-xl font-bold" style={{ color: BRAND.darkBlue }}>{video.title}</h2>
-                <div className="flex items-center gap-3 mt-2 text-xs" style={{ color: BRAND.lightBlue }}>
+                <div className="flex items-center gap-3 mt-2 text-xs flex-wrap" style={{ color: BRAND.lightBlue }}>
                     {video.format && <span>{video.format}</span>}
                     {video.language && <span>• {video.language}</span>}
                     {video.deadline && <span>• Deadline: {new Date(video.deadline).toLocaleDateString('fr-FR')}</span>}
+                    {video.sessionDateTime && <span>• Session: {new Date(video.sessionDateTime).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>}
                 </div>
                 
                 {/* Barre de progression par étapes */}
@@ -1005,6 +1009,7 @@ const App = () => {
                 videoUrl: rec.fields['Lien Vidéo'] || rec.fields['Lien vidéo'] || rec.fields['Lien Video'] || "",
                 driveUrl: rec.fields['Lien Drive'] || rec.fields['Lien drive'] || "",
                 driveSessionUrl: rec.fields['Lien Drive Session (from Sessions de tournage)']?.[0] || "",
+                sessionDateTime: rec.fields['Date/heure de la session (from Sessions de tournage)']?.[0] || rec.fields['Date/heure de la session'] || "",
                 priority: rec.fields['Priorité'] || "",
                 progress: rec.fields['% Avancement'] || 0,
                 deadline: rec.fields['Deadline V1'] || "",
