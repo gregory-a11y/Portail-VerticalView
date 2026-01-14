@@ -633,13 +633,13 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 </div>
                 
                 {/* Barre de progression par étapes */}
-                <div className="mt-4">
+                <div className="mt-4 px-8">
                   <div className="text-xs mb-3 font-medium text-center" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
                   {/* Étapes de production avec grid pour espacement égal */}
-                  <div className="relative px-6">
+                  <div className="relative">
                     {/* Ligne de fond */}
-                    <div className="absolute top-[18px] left-[42px] right-[42px] h-0.5 bg-gray-200"></div>
+                    <div className="absolute top-[18px] left-[18px] right-[18px] h-0.5 bg-gray-200"></div>
                     
                     {/* Étapes en grid */}
                     <div className="grid grid-cols-7 gap-0">
