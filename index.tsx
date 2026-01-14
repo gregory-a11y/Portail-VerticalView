@@ -633,10 +633,10 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                   {/* Étapes de production - compact sur mobile */}
                   <div className="relative">
                     {/* Ligne de fond - centrée avec marges égales */}
-                    <div className="absolute top-[12px] md:top-[18px] h-0.5 bg-gray-200" style={{ left: '6%', right: '6%' }}></div>
+                    <div className="absolute top-[10px] md:top-[18px] h-0.5 bg-gray-200" style={{ left: '4%', right: '4%' }}></div>
                     
-                    {/* Étapes en grid */}
-                    <div className="grid grid-cols-7 gap-0">
+                    {/* Étapes en grid avec espacement */}
+                    <div className="grid grid-cols-7 gap-1 md:gap-0">
                       {[
                         { name: 'Brief', mobileName: 'Brief', key: 'Brief' },
                         { name: 'Pré-prod', mobileName: 'Pré-prod', key: 'Pré-prod' },
@@ -653,7 +653,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                         return (
                           <div key={step.key} className="flex flex-col items-center justify-start">
                             <div 
-                              className={`w-6 h-6 md:w-9 md:h-9 rounded-full flex items-center justify-center text-[8px] md:text-xs font-semibold relative z-10 ${
+                              className={`w-5 h-5 md:w-9 md:h-9 rounded-full flex items-center justify-center text-[7px] md:text-xs font-bold relative z-10 ${
                                 isComplete ? 'text-white' : 
                                 isCurrent ? 'text-white ring-2 md:ring-4 ring-blue-100' : 
                                 'bg-gray-200 text-gray-400'
@@ -664,7 +664,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                             >
                               {isComplete ? '✓' : index + 1}
                             </div>
-                            <div className={`text-[8px] md:text-[10px] mt-1 md:mt-2 font-semibold whitespace-nowrap leading-tight ${
+                            <div className={`text-[9px] md:text-[10px] mt-1 md:mt-2 font-bold whitespace-nowrap leading-tight ${
                               isComplete || isCurrent ? '' : 'text-gray-400'
                             }`}
                             style={{
