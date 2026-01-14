@@ -215,7 +215,7 @@ const VideoRow: React.FC<{ video: Video; onOpen: (v: Video) => void }> = ({ vide
           {video.deadline && <span className="mx-2 opacity-30">|</span>}
           {video.deadline && <span className="font-medium opacity-70">Deadline: {new Date(video.deadline).toLocaleDateString('fr-FR')}</span>}
           {video.sessionDateTime && <span className="mx-2 opacity-30">|</span>}
-          {video.sessionDateTime && <span className="font-medium opacity-70">Session: {new Date(video.sessionDateTime).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>}
+          {video.sessionDateTime && <span className="font-medium opacity-70">Tournage: {new Date(video.sessionDateTime).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>}
         </p>
       </div>
 
@@ -627,7 +627,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                     {video.format && <span>{video.format}</span>}
                     {video.language && <span>• {video.language}</span>}
                     {video.deadline && <span>• Deadline: {new Date(video.deadline).toLocaleDateString('fr-FR')}</span>}
-                    {video.sessionDateTime && <span>• Session: {new Date(video.sessionDateTime).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>}
+                    {video.sessionDateTime && <span>• Tournage: {new Date(video.sessionDateTime).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>}
                 </div>
                 
                 {/* Barre de progression par étapes */}
