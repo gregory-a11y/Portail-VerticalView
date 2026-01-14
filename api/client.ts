@@ -3,10 +3,24 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 
+// Add error checking
+if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+  console.error('Missing environment variables:', {
+    hasApiKey: !!AIRTABLE_API_KEY,
+    hasBaseId: !!AIRTABLE_BASE_ID
+  });
+}
+
 async function fetchAirtable(tableIdOrName: string, filterFormula?: string) {
+  if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+    throw new Error('Missing Airtable configuration');
+  }
+  
   const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableIdOrName)}${
     filterFormula ? `?filterByFormula=${encodeURIComponent(filterFormula)}` : ''
   }`;
+
+  console.log('Fetching from Airtable:', { table: tableIdOrName, baseId: AIRTABLE_BASE_ID.substring(0, 8) + '...' });
 
   const response = await fetch(url, {
     headers: {
@@ -16,6 +30,8 @@ async function fetchAirtable(tableIdOrName: string, filterFormula?: string) {
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Airtable API error:', response.status, errorText);
     throw new Error(`Airtable API error: ${response.statusText}`);
   }
 
@@ -46,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Fetch client data
     const clientFormula = `RECORD_ID() = '${clientId}'`;
-    const clientRes = await fetchAirtable('Clients', clientFormula);
+    const clientRes = await fetchAirtable('tblvndxiZaqAVGP5O', clientFormula); // Table ID instead of name
 
     if (clientRes.records.length === 0) {
       return res.status(404).json({ error: 'Client not found' });
