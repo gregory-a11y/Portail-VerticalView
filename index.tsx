@@ -1009,7 +1009,7 @@ const App = () => {
                 videoUrl: rec.fields['Lien Vidéo'] || rec.fields['Lien vidéo'] || rec.fields['Lien Video'] || "",
                 driveUrl: rec.fields['Lien Drive'] || rec.fields['Lien drive'] || "",
                 driveSessionUrl: rec.fields['Lien Drive Session (from Sessions de tournage)']?.[0] || "",
-                sessionDateTime: rec.fields['Date/heure de la session (from Sessions de tournage)']?.[0] || rec.fields['Date/heure de la session'] || "",
+                sessionDateTime: rec.fields['Date/heure de la session (from Sessions de tournage)']?.[0] || "",
                 priority: rec.fields['Priorité'] || "",
                 progress: rec.fields['% Avancement'] || 0,
                 deadline: rec.fields['Deadline V1'] || "",
