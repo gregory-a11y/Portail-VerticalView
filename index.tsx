@@ -627,16 +627,16 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 </div>
                 
                 {/* Barre de progression par étapes */}
-                <div className="mt-4 px-2 md:px-8">
-                  <div className="text-xs mb-3 font-medium text-center" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
+                <div className="mt-4 px-1 md:px-8">
+                  <div className="text-xs mb-2 md:mb-3 font-medium text-center" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
                   
-                  {/* Étapes de production - responsive */}
-                  <div className="relative overflow-x-auto">
+                  {/* Étapes de production - compact sur mobile */}
+                  <div className="relative">
                     {/* Ligne de fond */}
-                    <div className="absolute top-[18px] left-[18px] right-[18px] h-0.5 bg-gray-200"></div>
+                    <div className="absolute top-[14px] md:top-[18px] left-[10px] md:left-[18px] right-[10px] md:right-[18px] h-0.5 bg-gray-200"></div>
                     
                     {/* Étapes en grid */}
-                    <div className="grid grid-cols-7 gap-0 min-w-[500px] md:min-w-0">
+                    <div className="grid grid-cols-7 gap-0">
                       {[
                         { name: 'Brief', key: 'Brief' },
                         { name: 'Pré-prod', key: 'Pré-prod' },
@@ -653,7 +653,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                         return (
                           <div key={step.key} className="flex flex-col items-center">
                             <div 
-                              className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-[10px] md:text-xs font-semibold relative z-10 ${
+                              className={`w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center text-[9px] md:text-xs font-semibold relative z-10 ${
                                 isComplete ? 'text-white' : 
                                 isCurrent ? 'text-white ring-2 md:ring-4 ring-blue-100' : 
                                 'bg-gray-200 text-gray-400'
@@ -664,7 +664,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                             >
                               {isComplete ? '✓' : index + 1}
                             </div>
-                            <div className={`text-[9px] md:text-[10px] mt-1.5 md:mt-2 font-medium whitespace-nowrap ${
+                            <div className={`text-[8px] md:text-[10px] mt-1 md:mt-2 font-medium whitespace-nowrap ${
                               isComplete || isCurrent ? '' : 'text-gray-400'
                             }`}
                             style={{
