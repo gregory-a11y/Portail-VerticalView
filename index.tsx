@@ -24,8 +24,17 @@ import {
   RefreshCw
 } from "lucide-react";
 
-// --- CONFIGURATION AIRTABLE (Removed - Now using secure API routes) ---
-// No API keys exposed on client side anymore
+// --- CONFIGURATION AIRTABLE ---
+const AIRTABLE_CONFIG = {
+  apiKey: import.meta.env.VITE_AIRTABLE_API_KEY || "YOUR_API_KEY_HERE",
+  baseId: import.meta.env.VITE_AIRTABLE_BASE_ID || "appT3ZJJUIAPnuHR9",
+  tables: {
+    clients: "tblvndxiZaqAVGP5O",
+    contrats: "Contrats",
+    videos: "Vidéos",
+    equipe: "Équipe"
+  }
+};
 
 // --- BRANDING CONFIG ---
 const BRAND = {
@@ -94,45 +103,62 @@ interface TeamMember {
   photoUrl: string;
 }
 
-// --- API HELPERS (Now calling secure backend routes) ---
+// --- API HELPERS ---
 
-// Create Airtable record via API
-const createAirtableRecord = async (tableName: string, fields: Record<string, any>) => {
-  const response = await fetch('/api/feedback', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      videoId: fields['Vidéo'][0], 
-      title: fields['Titre'], 
-      comment: fields['Commentaire'], 
-      type: fields['Type'] 
-    })
+const fetchAirtable = async (tableName: string, filterFormula: string = "") => {
+  const url = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${encodeURIComponent(tableName)}?filterByFormula=${encodeURIComponent(filterFormula)}`;
+  
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${AIRTABLE_CONFIG.apiKey}`
+    }
   });
-  
+
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to create record');
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || "Erreur de connexion Airtable");
   }
-  
+
   return response.json();
 };
 
-// Update Airtable record via API  
-const updateAirtableRecord = async (tableName: string, recordId: string, fields: Record<string, any>) => {
-  const response = await fetch('/api/update-video', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      videoId: recordId, 
-      status: fields['Statut production'] 
-    })
+const createAirtableRecord = async (tableName: string, fields: Record<string, any>) => {
+  const url = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${encodeURIComponent(tableName)}`;
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ fields })
   });
-  
+
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to update record');
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || "Erreur lors de la création");
   }
+
+  return response.json();
+};
+
+const updateAirtableRecord = async (tableName: string, recordId: string, fields: Record<string, any>) => {
+  const url = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${encodeURIComponent(tableName)}/${recordId}`;
   
+  const response = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ fields })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || "Erreur lors de la mise à jour");
+  }
+
   return response.json();
 };
 
@@ -927,22 +953,79 @@ const App = () => {
         setLoading(true);
         setError(null);
 
-        // Call secure API route instead of direct Airtable
-        const response = await fetch(`/api/client?clientId=${clientRecordId}`);
+        // 1. Fetch Client
+        const clientRes = await fetchAirtable(AIRTABLE_CONFIG.tables.clients, `RECORD_ID()='${clientRecordId}'`);
+        if (clientRes.records.length === 0) throw new Error("Client introuvable.");
         
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch client data');
-        }
+        const clientRec = clientRes.records[0];
+        const clientData: Client = {
+            id: clientRec.id,
+            companyName: clientRec.fields['Nom du client'] || "Société Inconnue",
+            logoUrl: clientRec.fields['Logo']?.[0]?.url || "",
+            email: clientRec.fields['Email contact principal'] || "",
+            status: clientRec.fields['Statut'] || "Actif",
+            type: clientRec.fields['Type de client'] || "",
+            driveTournage: clientRec.fields['Drive Tournage'] || ""
+        };
+        setClient(clientData);
 
-        const data = await response.json();
-        
-        // Set all data from API response
-        setClient(data.client);
-        setContracts(data.contracts);
-        setVideos(data.videos);
-        setTeamMembers(data.team);
-        
+        const safeCompanyName = clientData.companyName.replace(/'/g, "\\'");
+
+        // 2. Fetch Contracts
+        const contractRes = await fetchAirtable(AIRTABLE_CONFIG.tables.contrats, `FIND('${safeCompanyName}', {Clients}) > 0`);
+        const mappedContracts: Contract[] = contractRes.records.map((contractRec: any) => {
+            const contractFile = contractRec.fields['Contrat']?.[0];
+            return {
+                id: contractRec.id,
+                name: contractRec.fields['Nom du contrat'] || "",
+                type: contractRec.fields['Type de contrat'] || "Contrat Cadre",
+                totalVideos: contractRec.fields['Vidéos prévues'] || 0,
+                deliveredVideos: contractRec.fields['Vidéos livrées'] || 0,
+                startDate: contractRec.fields['Date de début'] || "",
+                endDate: contractRec.fields['Date de fin'] || "",
+                status: contractRec.fields['Statut du contrat'] || contractRec.fields['Statut contrat'] || "Actif",
+                progressionPercent: contractRec.fields['Progression accomplissement du contrat %'] || 0,
+                contractFileUrl: contractFile?.url || "",
+                contractFileName: contractFile?.filename || "contrat.pdf"
+            };
+        });
+        setContracts(mappedContracts);
+
+        // 3. Fetch Videos
+        const videoFormula = `FIND('${safeCompanyName}', ARRAYJOIN({Lien client vidéo})) > 0`;
+        const videoRes = await fetchAirtable(AIRTABLE_CONFIG.tables.videos, videoFormula);
+        const mappedVideos: Video[] = videoRes.records.map((rec: any) => {
+            return {
+                id: rec.id,
+                title: rec.fields['Titre vidéo'] || "Sans titre",
+                format: rec.fields['Format vidéo'] || "",
+                language: rec.fields['Langue'] || "",
+                status: rec.fields['Statut production'] || "📝 1. À brief",
+                videoUrl: rec.fields['Lien Vidéo'] || rec.fields['Lien vidéo'] || rec.fields['Lien Video'] || "",
+                driveUrl: rec.fields['Lien Drive'] || rec.fields['Lien drive'] || "",
+                driveSessionUrl: rec.fields['Lien Drive Session (from Sessions de tournage)']?.[0] || "",
+                priority: rec.fields['Priorité'] || "",
+                progress: rec.fields['% Avancement'] || 0,
+                deadline: rec.fields['Deadline V1'] || "",
+                deliveryDate: rec.fields['Date livraison réelle'] || "",
+                invoiceNumber: rec.fields['N° Facture'] || "",
+                rushUrl: rec.fields['Lien rushes'] || rec.fields['Lien Rushes'] || rec.fields['Lien Rush'] || ""
+            };
+        });
+        setVideos(mappedVideos);
+
+        // 4. Fetch Team Members
+        const teamRes = await fetchAirtable(AIRTABLE_CONFIG.tables.equipe, "FIND('Communication Clients', {Rôles}) > 0");
+        const mappedTeam: TeamMember[] = teamRes.records.map((rec: any) => ({
+            id: rec.id,
+            name: rec.fields['Nom complet'] || "Membre",
+            roles: rec.fields['Rôles'] || [],
+            email: rec.fields['E-mail'] || "",
+            whatsapp: rec.fields['WhatsApp'] || "",
+            photoUrl: rec.fields['Photo']?.[0]?.url || ""
+        }));
+        setTeamMembers(mappedTeam);
+
         setView('dashboard');
 
       } catch (err: any) {
