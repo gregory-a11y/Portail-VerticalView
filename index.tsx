@@ -1008,7 +1008,7 @@ const App = () => {
                 status: rec.fields['Statut production'] || "📝 1. À brief",
                 videoUrl: rec.fields['Lien vidéo'] || "",
                 driveUrl: rec.fields['Lien dossier vidéo'] || "",
-                driveSessionUrl: rec.fields['Lien Drive Session (from Sessions de tournage)']?.[0] || "",
+                driveSessionUrl: rec.fields['Lien dossier vidéo'] || "",
                 sessionDateTime: rec.fields['Date/heure de la session (from Sessions de tournage)']?.[0] || "",
                 priority: rec.fields['Priorité'] || "",
                 progress: rec.fields['% Avancement'] || 0,
