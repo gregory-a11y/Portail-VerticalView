@@ -51,7 +51,7 @@ const BRAND = {
 
 // --- TYPES ---
 
-type Status = "📝 1. À brief" | "📋 2. Pré-prod" | "✂️ 3. Post-production" | "📨 4. Review Client" | "✏️4. Review Client" | "🔁 5. Revision Interne" | "☑️ 6. Validé par le client" | "📦 7. Livrée" | "🗄️ 8. Archivée";
+type Status = "📝 1. À brief" | "📋 2. Pré-prod" | "✂️ 3. Post-production" | "📨 4. Review Client" | "✏️4. Review Client" | "🔁 5. Revision Interne" | "📦 6. Livrée" | "🗄️ 7. Archivée";
 
 interface Client {
   id: string;
@@ -166,13 +166,13 @@ const updateAirtableRecord = async (tableName: string, recordId: string, fields:
 // --- COMPONENTS ---
 
 const StatusIcon = ({ status }: { status: Status }) => {
-  if (status.includes("Validé") || status === "📦 7. Livrée") {
+  if (status.includes("Livrée")) {
     return <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><CheckCircle2 size={16} /></div>;
   }
   if (status === "📨 4. Review Client" || status === "🔁 5. Revision Interne") {
     return <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><AlertCircle size={16} /></div>;
   }
-  if (status === "🗄️ 8. Archivée") {
+  if (status === "🗄️ 7. Archivée") {
     return <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600"><CheckCircle2 size={16} /></div>;
   }
   return <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#EBF1FF]" style={{ color: BRAND.blue }}><Clock size={16} /></div>;
@@ -186,8 +186,8 @@ const VideoRow: React.FC<{ video: Video; onOpen: (v: Video) => void }> = ({ vide
 
   // Seulement Review Client nécessite une action du client
   const needsClientAction = video.status.includes("Review Client");
-  const isValidatedOrDelivered = video.status.includes("Valid") || video.status.includes("Livr");
-  const isInProgress = !needsClientAction && !isValidatedOrDelivered;
+  const isDelivered = video.status.includes("Livr");
+  const isInProgress = !needsClientAction && !isDelivered;
   
   return (
     <div 
@@ -221,8 +221,8 @@ const VideoRow: React.FC<{ video: Video; onOpen: (v: Video) => void }> = ({ vide
 
       <div className="hidden md:block shrink-0">
         <span className="px-3 py-1 text-xs font-medium rounded-full" style={{ 
-          backgroundColor: isValidatedOrDelivered ? "#D1FAE5" : needsClientAction ? "#FEF3C7" : "#EBF1FF",
-          color: isValidatedOrDelivered ? "#065F46" : needsClientAction ? "#92400E" : BRAND.blue
+          backgroundColor: isDelivered ? "#D1FAE5" : needsClientAction ? "#FEF3C7" : "#EBF1FF",
+          color: isDelivered ? "#065F46" : needsClientAction ? "#92400E" : BRAND.blue
         }}>
           {getStatusLabel(video.status)}
         </span>
@@ -238,7 +238,7 @@ const VideoRow: React.FC<{ video: Video; onOpen: (v: Video) => void }> = ({ vide
             className="h-full transition-all duration-500 ease-out rounded-full"
             style={{ 
                 width: `${video.progress * 100}%`,
-                backgroundColor: isValidatedOrDelivered ? BRAND.success : needsClientAction ? BRAND.warning : BRAND.blue
+                backgroundColor: isDelivered ? BRAND.success : needsClientAction ? BRAND.warning : BRAND.blue
             }}
             />
         </div>
@@ -439,7 +439,6 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
     return status.replace(/^[^a-zA-ZÀ-ÿ]+/, '').trim();
   };
 
-  const isValidated = video.status.includes("Validé");
   const isDelivered = video.status.includes("Livrée");
   const isInClientReview = video.status.includes("Review Client");
   const isInInternalReview = video.status.includes("Revision Interne");
@@ -456,7 +455,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
     try {
       // Déterminer le nouveau statut
       const newStatus = feedbackType === 'validation' 
-        ? '☑️ 6. Validé par le client' 
+        ? '📦 6. Livrée' 
         : '🔁 5. Revision Interne';
 
       // 1. Si validation, juste mettre à jour le statut (pas de feedback)
@@ -479,7 +478,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
       setComment("");
       
       if (feedbackType === 'validation') {
-        alert("Vidéo validée avec succès ! Le statut a été mis à jour.");
+        alert("Vidéo validée avec succès ! Elle est maintenant marquée comme livrée.");
       } else {
         alert("Demande de révision envoyée ! L'équipe Vertical View a été notifiée.");
       }
@@ -616,8 +615,8 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 <div className="flex items-center gap-3 mb-2">
                     <StatusIcon status={video.status} />
                     <span className="px-2 py-1 text-xs font-semibold rounded-full" style={{ 
-                      backgroundColor: isDelivered || isValidated ? "#D1FAE5" : isInClientReview || isInInternalReview ? "#FEF3C7" : "#EBF1FF",
-                      color: isDelivered || isValidated ? "#065F46" : isInClientReview || isInInternalReview ? "#92400E" : BRAND.blue
+                      backgroundColor: isDelivered ? "#D1FAE5" : isInClientReview || isInInternalReview ? "#FEF3C7" : "#EBF1FF",
+                      color: isDelivered ? "#065F46" : isInClientReview || isInInternalReview ? "#92400E" : BRAND.blue
                     }}>
                       {getStatusLabel(video.status)}
                     </span>
@@ -639,15 +638,14 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                     {/* Ligne de fond - centrée avec marges égales */}
                     <div className="absolute top-[9px] md:top-[18px] h-0.5 bg-gray-200" style={{ left: '4%', right: '4%' }}></div>
                     
-                    {/* Étapes en grid avec espacement */}
-                    <div className="grid grid-cols-7 gap-2 md:gap-0">
+                    {/* Étapes en grid avec espacement - 6 étapes maintenant */}
+                    <div className="grid grid-cols-6 gap-2 md:gap-0">
                       {[
                         { name: 'Brief', mobileName: 'Brief', key: 'Brief' },
                         { name: 'Pré-prod', mobileName: 'Prépro', key: 'Pré-prod' },
-                        { name: 'Tournage', mobileName: 'Tourn.', key: 'Tournage' },
                         { name: 'Post-prod', mobileName: 'Post', key: 'Post-production' },
                         { name: 'Review', mobileName: 'Review', key: 'Review' },
-                        { name: 'Validé', mobileName: 'Validé', key: 'Validé' },
+                        { name: 'Révision', mobileName: 'Révis.', key: 'Revision Interne' },
                         { name: 'Livré', mobileName: 'Livré', key: 'Livrée' }
                       ].map((step, index, array) => {
                         const currentStepIndex = array.findIndex(s => video.status.includes(s.key));
@@ -761,23 +759,6 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 </div>
               )}
               
-              {/* Validé */}
-              {isValidated && (
-                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600">
-                      <CheckCircle2 size={20} />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-emerald-900">Vidéo validée !</h3>
-                      <p className="text-sm text-emerald-700 mt-0.5">
-                        Cette vidéo a été approuvée et est prête pour livraison.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
               {/* Livrée */}
               {isDelivered && (
                 <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
@@ -865,9 +846,9 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                         setIsSubmitting(true);
                         try {
                             await updateAirtableRecord('Vidéos', video.id, {
-                                'Statut production': '☑️ 6. Validé par le client'
+                                'Statut production': '📦 6. Livrée'
                             });
-                            alert("Vidéo validée avec succès !");
+                            alert("Vidéo validée avec succès ! Elle est maintenant marquée comme livrée.");
                             if (onVideoUpdated) onVideoUpdated();
                             onClose();
                         } catch (error: any) {
@@ -1077,8 +1058,7 @@ const App = () => {
     if (status.includes("Tournage")) return 3; // 4. Tournage planifié
     if (status.includes("Post-production")) return 4; // 5. Post-production
     if (status.includes("Revision Interne")) return 5; // 6. Révision interne
-    if (status.includes("Validé")) return 6; // 7. Validé par le client
-    if (status.includes("Livrée")) return 7; // 8. Livrée
+    if (status.includes("Livrée")) return 6; // 7. Livrée
     return 10; // Autres statuts à la fin
   };
 
