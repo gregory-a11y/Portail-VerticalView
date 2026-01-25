@@ -24,16 +24,14 @@ import {
   RefreshCw
 } from "lucide-react";
 
-// --- CONFIGURATION AIRTABLE ---
-const AIRTABLE_CONFIG = {
-  apiKey: import.meta.env.VITE_AIRTABLE_API_KEY || "YOUR_API_KEY_HERE",
-  baseId: import.meta.env.VITE_AIRTABLE_BASE_ID || "appT3ZJJUIAPnuHR9",
-  tables: {
-    clients: "tblvndxiZaqAVGP5O",
-    contrats: "Contrats",
-    videos: "Vidéos",
-    equipe: "Équipe"
-  }
+// --- CONFIGURATION ---
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
+const AIRTABLE_TABLES = {
+  clients: "tblvndxiZaqAVGP5O",
+  contrats: "Contrats",
+  videos: "Vidéos",
+  equipe: "Équipe"
 };
 
 // --- BRANDING CONFIG ---
@@ -107,57 +105,64 @@ interface TeamMember {
 // --- API HELPERS ---
 
 const fetchAirtable = async (tableName: string, filterFormula: string = "") => {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${encodeURIComponent(tableName)}?filterByFormula=${encodeURIComponent(filterFormula)}`;
-  
-  const response = await fetch(url, {
+  const response = await fetch(`${API_BASE_URL}/airtable`, {
+    method: 'POST',
     headers: {
-      Authorization: `Bearer ${AIRTABLE_CONFIG.apiKey}`
-    }
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      action: 'fetch',
+      tableName,
+      filterFormula
+    })
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.error?.message || "Erreur de connexion Airtable");
+    throw new Error(errorData.error || "Erreur de connexion Airtable");
   }
 
   return response.json();
 };
 
 const createAirtableRecord = async (tableName: string, fields: Record<string, any>) => {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${encodeURIComponent(tableName)}`;
-  
-  const response = await fetch(url, {
+  const response = await fetch(`${API_BASE_URL}/airtable`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${AIRTABLE_CONFIG.apiKey}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ fields })
+    body: JSON.stringify({
+      action: 'create',
+      tableName,
+      fields
+    })
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.error?.message || "Erreur lors de la création");
+    throw new Error(errorData.error || "Erreur lors de la création");
   }
 
   return response.json();
 };
 
 const updateAirtableRecord = async (tableName: string, recordId: string, fields: Record<string, any>) => {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${encodeURIComponent(tableName)}/${recordId}`;
-  
-  const response = await fetch(url, {
-    method: 'PATCH',
+  const response = await fetch(`${API_BASE_URL}/airtable`, {
+    method: 'POST',
     headers: {
-      Authorization: `Bearer ${AIRTABLE_CONFIG.apiKey}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ fields })
+    body: JSON.stringify({
+      action: 'update',
+      tableName,
+      recordId,
+      fields
+    })
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.error?.message || "Erreur lors de la mise à jour");
+    throw new Error(errorData.error || "Erreur lors de la mise à jour");
   }
 
   return response.json();
@@ -940,7 +945,7 @@ const App = () => {
         setError(null);
 
         // 1. Fetch Client
-        const clientRes = await fetchAirtable(AIRTABLE_CONFIG.tables.clients, `RECORD_ID()='${clientRecordId}'`);
+        const clientRes = await fetchAirtable(AIRTABLE_TABLES.clients, `RECORD_ID()='${clientRecordId}'`);
         if (clientRes.records.length === 0) throw new Error("Client introuvable.");
         
         const clientRec = clientRes.records[0];
@@ -958,7 +963,7 @@ const App = () => {
         const safeCompanyName = clientData.companyName.replace(/'/g, "\\'");
 
         // 2. Fetch Contracts
-        const contractRes = await fetchAirtable(AIRTABLE_CONFIG.tables.contrats, `FIND('${safeCompanyName}', {Clients}) > 0`);
+        const contractRes = await fetchAirtable(AIRTABLE_TABLES.contrats, `FIND('${safeCompanyName}', {Clients}) > 0`);
         const mappedContracts: Contract[] = contractRes.records.map((contractRec: any) => {
             const contractFile = contractRec.fields['Contrat']?.[0];
             return {
@@ -979,7 +984,7 @@ const App = () => {
 
         // 3. Fetch Videos
         const videoFormula = `FIND('${safeCompanyName}', ARRAYJOIN({Lien client vidéo})) > 0`;
-        const videoRes = await fetchAirtable(AIRTABLE_CONFIG.tables.videos, videoFormula);
+        const videoRes = await fetchAirtable(AIRTABLE_TABLES.videos, videoFormula);
         const mappedVideos: Video[] = videoRes.records.map((rec: any) => {
             return {
                 id: rec.id,
@@ -1002,7 +1007,7 @@ const App = () => {
         setVideos(mappedVideos);
 
         // 4. Fetch Team Members
-        const teamRes = await fetchAirtable(AIRTABLE_CONFIG.tables.equipe, "FIND('Communication Clients', {Rôles}) > 0");
+        const teamRes = await fetchAirtable(AIRTABLE_TABLES.equipe, "FIND('Communication Clients', {Rôles}) > 0");
         const mappedTeam: TeamMember[] = teamRes.records.map((rec: any) => ({
             id: rec.id,
             name: rec.fields['Nom complet'] || "Membre",
