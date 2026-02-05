@@ -648,7 +648,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                       {[
                         { name: 'Brief', mobileName: 'Brief', key: 'Brief' },
                         { name: 'Pré-prod', mobileName: 'Prépro', key: 'Pré-prod' },
-                        { name: 'Tournage', mobileName: 'Tourn.', key: 'Tournage' },
+                        { name: 'Tournage', mobileName: 'Tourn.', key: 'Tournage planifié' },
                         { name: 'Post-prod', mobileName: 'Post', key: 'Post-production' },
                         { name: 'Review', mobileName: 'Review', key: 'Review' },
                         { name: 'Révision', mobileName: 'Révis.', key: 'Revision Interne' },
