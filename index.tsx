@@ -49,7 +49,7 @@ const BRAND = {
 
 // --- TYPES ---
 
-type Status = "📝 1. À brief" | "📋 2. Pré-prod" | "✂️ 3. Post-production" | "📨 4. Review Client" | "✏️4. Review Client" | "🔁 5. Revision Interne" | "📦 6. Livrée" | "🗄️ 7. Archivée";
+type Status = "📝 1. À brief" | "📋 2. Pré-prod" | "🎬 2. Tournage planifié" | "✂️ 3. Post-production" | "📨 4. Review Client" | "✏️4. Review Client" | "🔁 5. Revision Interne" | "📦 6. Livrée" | "🗄️ 7. Archivée";
 
 interface Client {
   id: string;
@@ -643,11 +643,12 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                     {/* Ligne de fond - centrée avec marges égales */}
                     <div className="absolute top-[9px] md:top-[18px] h-0.5 bg-gray-200" style={{ left: '4%', right: '4%' }}></div>
                     
-                    {/* Étapes en grid avec espacement - 6 étapes maintenant */}
-                    <div className="grid grid-cols-6 gap-2 md:gap-0">
+                    {/* Étapes en grid avec espacement - 7 étapes maintenant */}
+                    <div className="grid grid-cols-7 gap-2 md:gap-0">
                       {[
                         { name: 'Brief', mobileName: 'Brief', key: 'Brief' },
                         { name: 'Pré-prod', mobileName: 'Prépro', key: 'Pré-prod' },
+                        { name: 'Tournage', mobileName: 'Tourn.', key: 'Tournage' },
                         { name: 'Post-prod', mobileName: 'Post', key: 'Post-production' },
                         { name: 'Review', mobileName: 'Review', key: 'Review' },
                         { name: 'Révision', mobileName: 'Révis.', key: 'Revision Interne' },
