@@ -934,17 +934,25 @@ const App = () => {
         });
         setVideos(mappedVideos);
 
-        // 4. Fetch Team Members
-        const teamRes = await fetchAirtable(AIRTABLE_TABLES.equipe, "FIND('Communication Clients', {Rôles}) > 0");
-        const mappedTeam: TeamMember[] = teamRes.records.map((rec: any) => ({
-            id: rec.id,
-            name: rec.fields['Nom complet'] || "Membre",
-            roles: rec.fields['Rôles'] || [],
-            email: rec.fields['E-mail'] || "",
-            whatsapp: rec.fields['WhatsApp'] || "",
-            photoUrl: rec.fields['Photo']?.[0]?.url || ""
-        }));
-        setTeamMembers(mappedTeam);
+        // 4. Fetch Team Members — équipe assignée au client
+        const assignedTeamIds: string[] = clientRec.fields['Équipe assignée'] || [];
+        if (assignedTeamIds.length > 0) {
+            const teamFormula = assignedTeamIds.length === 1
+                ? `RECORD_ID()='${assignedTeamIds[0]}'`
+                : `OR(${assignedTeamIds.map(id => `RECORD_ID()='${id}'`).join(',')})`;
+            const teamRes = await fetchAirtable(AIRTABLE_TABLES.equipe, teamFormula);
+            const mappedTeam: TeamMember[] = teamRes.records.map((rec: any) => ({
+                id: rec.id,
+                name: rec.fields['Nom complet'] || "Membre",
+                roles: rec.fields['Rôles'] || [],
+                email: rec.fields['E-mail'] || "",
+                whatsapp: rec.fields['WhatsApp'] || "",
+                photoUrl: rec.fields['Photo']?.[0]?.url || ""
+            }));
+            setTeamMembers(mappedTeam);
+        } else {
+            setTeamMembers([]);
+        }
 
         setView('dashboard');
 
