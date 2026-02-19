@@ -587,13 +587,13 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
                 </div>
 
                 {/* Barre de progression par étapes */}
-                <div className="mt-4 pl-10 pr-4 md:px-8">
+                <div className="mt-4 px-2 md:px-6">
                   <div className="text-xs mb-2 md:mb-3 font-medium text-center" style={{ color: BRAND.lightBlue }}>Avancement du projet</div>
 
                   <div className="relative">
-                    <div className="absolute top-[9px] md:top-[18px] h-0.5 bg-gray-200" style={{ left: '4%', right: '4%' }}></div>
+                    <div className="absolute top-[9px] md:top-[18px] h-0.5 bg-gray-200" style={{ left: '7%', right: '7%' }}></div>
 
-                    <div className="grid grid-cols-7 gap-2 md:gap-0">
+                    <div className="flex justify-between">
                       {[
                         { name: 'Brief', mobileName: 'Brief', key: 'Brief reçu' },
                         { name: 'Pré-prod', mobileName: 'Prépro', key: 'Pré-production' },
