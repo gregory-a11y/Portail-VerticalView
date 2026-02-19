@@ -15,7 +15,6 @@ import {
   ArrowUpRight,
   CreditCard,
   FileVideo,
-  Download,
   FolderOpen,
   Loader2,
   LogIn,
@@ -69,8 +68,6 @@ interface Project {
   endDate: string;
   status: string;
   progressionPercent: number;
-  documentUrl?: string;
-  documentName?: string;
 }
 
 interface Video {
@@ -249,7 +246,7 @@ const VideoRow: React.FC<{ video: Video; onOpen: (v: Video) => void }> = ({ vide
 const UnifiedProjectSection = ({ project }: { project: Project }) => {
   if (!project) return null;
 
-  const percent = project.progressionPercent ? Math.round(project.progressionPercent * 100) : 0;
+  const percent = (project.progressionPercent && isFinite(project.progressionPercent)) ? Math.round(project.progressionPercent * 100) : 0;
   const isProjectActive = project.status === "Actif";
 
   return (
@@ -304,20 +301,6 @@ const UnifiedProjectSection = ({ project }: { project: Project }) => {
                         <span className="font-semibold">{percent}%</span>
                     </div>
                 </div>
-
-                {project.documentUrl && (
-                    <a
-                        href={project.documentUrl}
-                        download={project.documentName}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full py-2.5 px-4 bg-white border rounded-lg text-sm font-bold hover:bg-[#F8FBFF] hover:border-[#122755] transition-all flex items-center justify-center gap-2 shadow-sm"
-                        style={{ color: BRAND.blue, borderColor: BRAND.coloredWhite }}
-                    >
-                        <Download size={16} />
-                        Télécharger le document
-                    </a>
-                )}
             </div>
         </div>
     </div>
@@ -917,7 +900,6 @@ const App = () => {
         // 2. Fetch Projects (anciennement Contrats)
         const projectRes = await fetchAirtable(AIRTABLE_TABLES.projets, `FIND('${safeCompanyName}', ARRAYJOIN({Clients})) > 0`);
         const mappedProjects: Project[] = projectRes.records.map((rec: any) => {
-            const documentFile = rec.fields['Document signé']?.[0];
             return {
                 id: rec.id,
                 name: rec.fields['Nom du projet'] || "",
@@ -926,9 +908,7 @@ const App = () => {
                 startDate: rec.fields['Date de début'] || "",
                 endDate: rec.fields['Date de fin'] || "",
                 status: rec.fields['Statut projet'] || "Actif",
-                progressionPercent: rec.fields['Progression %'] || 0,
-                documentUrl: documentFile?.url || "",
-                documentName: documentFile?.filename || "document.pdf"
+                progressionPercent: rec.fields['Progression %'] || 0
             };
         });
         setProjects(mappedProjects);
