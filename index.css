@@ -2,29 +2,178 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Variable.woff2') format('woff2'),
+       url('/fonts/GeneralSans-Variable.woff') format('woff');
+  font-weight: 200 700;
+  font-display: swap;
+  font-style: normal;
+}
+
+:root {
+  --navy: #02143B;
+  --blue: #122755;
+  --muted: #6B7A99;
+  --accent: #E53B46;
+  --surface: #F7F8FC;
+  --card: #FFFFFF;
+  --tint: #ECEAFF;
+  --border: rgba(18, 39, 85, 0.06);
+  --shadow-color: 220deg 60% 20%;
+}
+
 @layer base {
   body {
-    font-family: 'Inter', sans-serif;
-    background-color: #F4F7FC;
-    color: #02143B;
+    font-family: 'General Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--surface);
+    color: var(--navy);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 
-  /* Scrollbar personnalisée */
-  ::-webkit-scrollbar {
-    width: 8px;
+  ::selection {
+    background-color: var(--navy);
+    color: white;
   }
-  
-  ::-webkit-scrollbar-track {
-    background: #F4F7FC;
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(18, 39, 85, 0.12); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(18, 39, 85, 0.25); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
-  
-  ::-webkit-scrollbar-thumb {
-    background: #3E5075;
-    border-radius: 4px;
+}
+
+@layer components {
+  /* ── Premium shadows (layered, tinted) ── */
+  .shadow-card {
+    box-shadow:
+      0 1px 2px hsl(var(--shadow-color) / 0.02),
+      0 2px 4px hsl(var(--shadow-color) / 0.02),
+      0 4px 8px hsl(var(--shadow-color) / 0.02),
+      0 8px 16px hsl(var(--shadow-color) / 0.02);
   }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: #E53B46;
+  .shadow-card-hover {
+    box-shadow:
+      0 2px 4px hsl(var(--shadow-color) / 0.04),
+      0 4px 8px hsl(var(--shadow-color) / 0.04),
+      0 8px 16px hsl(var(--shadow-color) / 0.04),
+      0 16px 32px hsl(var(--shadow-color) / 0.04);
+  }
+  .shadow-modal {
+    box-shadow:
+      0 4px 8px hsl(var(--shadow-color) / 0.06),
+      0 8px 16px hsl(var(--shadow-color) / 0.06),
+      0 16px 32px hsl(var(--shadow-color) / 0.06),
+      0 32px 64px hsl(var(--shadow-color) / 0.08);
+  }
+
+  /* ── Card component ── */
+  .vv-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow:
+      0 1px 2px hsl(var(--shadow-color) / 0.02),
+      0 2px 4px hsl(var(--shadow-color) / 0.02),
+      0 4px 8px hsl(var(--shadow-color) / 0.02),
+      0 8px 16px hsl(var(--shadow-color) / 0.02);
+    transition: transform 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                border-color 300ms ease;
+  }
+  .vv-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(18, 39, 85, 0.1);
+    box-shadow:
+      0 2px 4px hsl(var(--shadow-color) / 0.04),
+      0 4px 8px hsl(var(--shadow-color) / 0.04),
+      0 8px 16px hsl(var(--shadow-color) / 0.04),
+      0 16px 32px hsl(var(--shadow-color) / 0.04);
+  }
+
+  /* ── Progress bar with shimmer ── */
+  .progress-track {
+    height: 6px;
+    background: rgba(18, 39, 85, 0.04);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    position: relative;
+    transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .progress-fill.active::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  /* ── Staggered entry ── */
+  @keyframes enterUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes enterFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.5); }
+  }
+
+  .enter-up {
+    opacity: 0;
+    animation: enterUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+  .enter-fade { opacity: 0; animation: enterFade 0.5s ease forwards; }
+  .enter-scale { opacity: 0; animation: scaleIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+
+  .stagger-1 { animation-delay: 80ms; }
+  .stagger-2 { animation-delay: 160ms; }
+  .stagger-3 { animation-delay: 240ms; }
+  .stagger-4 { animation-delay: 320ms; }
+  .stagger-5 { animation-delay: 400ms; }
+  .stagger-6 { animation-delay: 480ms; }
+
+  /* ── Section label ── */
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── Dot accent (brand signature) ── */
+  .dot-accent {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .dot-pulse {
+    animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
