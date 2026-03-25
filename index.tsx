@@ -245,7 +245,8 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
   const [feedbackType, setFeedbackType] = useState<'validation' | 'modification' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
-  useEffect(() => { setVideoLoaded(false); }, [video?.id]);
+  const [videoError, setVideoError] = useState(false);
+  useEffect(() => { setVideoLoaded(false); setVideoError(false); }, [video?.id]);
   if (!isOpen || !video) return null;
 
   const isDelivered = video.status.includes("Livrée");
@@ -265,18 +266,19 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
     } catch (e: any) { alert("Erreur: " + e.message); } finally { setIsSubmitting(false); }
   };
 
-  const getEmbed = (url: string) => {
+  const getEmbed = (url: string): { url: string; direct: boolean; fallbackUrl?: string } | null => {
     if (!url) return null; let m;
-    if ((m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/))) return `https://www.youtube.com/embed/${m[1]}`;
-    if ((m = url.match(/vimeo\.com\/(\d+)/))) return `https://player.vimeo.com/video/${m[1]}`;
-    if ((m = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/))) return `https://drive.google.com/file/d/${m[1]}/preview`;
-    if ((m = url.match(/drive\.google\.com\/open\?id=([^&]+)/))) return `https://drive.google.com/file/d/${m[1]}/preview`;
-    if (url.match(/\.(mp4|webm|ogg)$/i)) return url;
+    if ((m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/))) return { url: `https://www.youtube.com/embed/${m[1]}`, direct: false };
+    if ((m = url.match(/vimeo\.com\/(\d+)/))) return { url: `https://player.vimeo.com/video/${m[1]}`, direct: false };
+    if ((m = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/))) return { url: `https://drive.google.com/uc?export=view&id=${m[1]}`, direct: true, fallbackUrl: `https://drive.google.com/file/d/${m[1]}/preview` };
+    if ((m = url.match(/drive\.google\.com\/open\?id=([^&]+)/))) return { url: `https://drive.google.com/uc?export=view&id=${m[1]}`, direct: true, fallbackUrl: `https://drive.google.com/file/d/${m[1]}/preview` };
+    if (url.match(/\.(mp4|webm|ogg)$/i)) return { url, direct: true };
     return null;
   };
-  const embedUrl = video.videoUrl ? getEmbed(video.videoUrl) : null;
-  const isDirect = embedUrl && embedUrl === video.videoUrl;
-  const isDriveEmbed = !isDirect && embedUrl?.includes('drive.google.com');
+  const embed = video.videoUrl ? getEmbed(video.videoUrl) : null;
+  const useDirect = embed?.direct && !videoError;
+  const embedUrl = useDirect ? embed?.url : (embed?.fallbackUrl || embed?.url) || null;
+  const isDirect = useDirect ?? false;
 
   const steps = [
     { label: 'Brief', key: 'Brief reçu' }, { label: 'Pré-prod', key: 'Pré-production' },
@@ -311,10 +313,10 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
               </div>
             )}
             {isDirect ? (
-              <video controls preload="auto" className={`w-full h-full object-contain transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} src={embedUrl} onLoadedData={() => setVideoLoaded(true)} />
+              <video controls preload="auto" className={`w-full h-full object-contain transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} src={embedUrl}
+                onLoadedData={() => setVideoLoaded(true)} onError={() => { setVideoError(true); setVideoLoaded(false); }} />
             ) : (
               <iframe src={embedUrl} className={`w-full h-full transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                style={isDriveEmbed ? { transform: 'scale(1.35)', transformOrigin: 'center center' } : undefined}
                 frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="eager" onLoad={() => setVideoLoaded(true)} />
             )}
             {/* Title overlay at top */}
