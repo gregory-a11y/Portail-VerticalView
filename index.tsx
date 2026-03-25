@@ -297,27 +297,25 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
       {/* Modal — horizontal layout on desktop */}
       <div className="relative w-full max-w-[900px] max-h-[90vh] flex flex-col md:flex-row overflow-hidden rounded-2xl md:rounded-3xl enter-scale" style={{ boxShadow: '0 32px 64px rgba(0,0,0,0.4)' }}>
 
-        {/* LEFT — Video preview (vertical) */}
+        {/* LEFT — Video preview */}
         {embedUrl && (
-          <div className="relative bg-[#0a0a0a] md:w-[340px] lg:w-[380px] shrink-0 flex items-center justify-center overflow-hidden" style={{ minHeight: '300px' }}>
-            <div className="w-full h-full relative" style={{ aspectRatio: '9/16' }}>
-              {!videoLoaded && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
-                  <svg className="w-8 h-8" viewBox="0 0 40 40" style={{ animation: 'spinRotate 1.1s linear infinite' }}>
-                    <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
-                    <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeDasharray="60 100" strokeLinecap="round" />
-                  </svg>
-                  <style>{`@keyframes spinRotate { to { transform: rotate(360deg); } }`}</style>
-                </div>
-              )}
-              {isDirect ? (
-                <video controls preload="auto" className={`w-full h-full object-cover transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} src={embedUrl} onLoadedData={() => setVideoLoaded(true)} />
-              ) : (
-                <iframe src={embedUrl} className={`w-full h-full transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="eager" onLoad={() => setVideoLoaded(true)} />
-              )}
-            </div>
-            {/* Title overlay at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
+          <div className="relative bg-[#0a0a0a] w-full h-[45vh] md:h-auto md:w-[380px] shrink-0 flex items-center justify-center overflow-hidden">
+            {!videoLoaded && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
+                <svg className="w-8 h-8" viewBox="0 0 40 40" style={{ animation: 'spinRotate 1.1s linear infinite' }}>
+                  <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
+                  <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeDasharray="60 100" strokeLinecap="round" />
+                </svg>
+                <style>{`@keyframes spinRotate { to { transform: rotate(360deg); } }`}</style>
+              </div>
+            )}
+            {isDirect ? (
+              <video controls preload="auto" className={`w-full h-full object-contain transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} src={embedUrl} onLoadedData={() => setVideoLoaded(true)} />
+            ) : (
+              <iframe src={embedUrl} className={`w-full h-full transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="eager" onLoad={() => setVideoLoaded(true)} />
+            )}
+            {/* Title overlay at top */}
+            <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none z-20">
               <h2 className="text-white font-bold text-[15px] leading-snug">{video.title}</h2>
               <p className="text-white/50 text-[11px] mt-0.5">{video.language}{video.deadline && ` · Deadline ${new Date(video.deadline).toLocaleDateString('fr-FR')}`}</p>
             </div>
