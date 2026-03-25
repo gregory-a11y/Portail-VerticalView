@@ -299,7 +299,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
 
         {/* LEFT — Video preview */}
         {embedUrl && (
-          <div className="relative bg-[#0a0a0a] w-full h-[45vh] md:h-auto md:w-[380px] shrink-0 flex items-center justify-center overflow-hidden">
+          <div className="relative bg-[#0a0a0a] w-full h-[50vh] md:h-auto md:w-[380px] shrink-0 flex items-center justify-center overflow-hidden">
             {!videoLoaded && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
                 <svg className="w-8 h-8" viewBox="0 0 40 40" style={{ animation: 'spinRotate 1.1s linear infinite' }}>
@@ -312,7 +312,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
             {isDirect ? (
               <video controls preload="auto" className={`w-full h-full object-contain transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} src={embedUrl} onLoadedData={() => setVideoLoaded(true)} />
             ) : (
-              <iframe src={embedUrl} className={`w-full h-full transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="eager" onLoad={() => setVideoLoaded(true)} />
+              <iframe src={embedUrl} className={`h-full aspect-[9/16] max-w-full mx-auto transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="eager" onLoad={() => setVideoLoaded(true)} />
             )}
             {/* Title overlay at top */}
             <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none z-20">
