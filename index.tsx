@@ -276,6 +276,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
   };
   const embedUrl = video.videoUrl ? getEmbed(video.videoUrl) : null;
   const isDirect = embedUrl && embedUrl === video.videoUrl;
+  const isDriveEmbed = !isDirect && embedUrl?.includes('drive.google.com');
 
   const steps = [
     { label: 'Brief', key: 'Brief reçu' }, { label: 'Pré-prod', key: 'Pré-production' },
@@ -312,7 +313,9 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
             {isDirect ? (
               <video controls preload="auto" className={`w-full h-full object-contain transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} src={embedUrl} onLoadedData={() => setVideoLoaded(true)} />
             ) : (
-              <iframe src={embedUrl} className={`h-full aspect-[9/16] max-w-full mx-auto transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="eager" onLoad={() => setVideoLoaded(true)} />
+              <iframe src={embedUrl} className={`w-full h-full transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                style={isDriveEmbed ? { transform: 'scale(1.35)', transformOrigin: 'center center' } : undefined}
+                frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="eager" onLoad={() => setVideoLoaded(true)} />
             )}
             {/* Title overlay at top */}
             <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none z-20">
