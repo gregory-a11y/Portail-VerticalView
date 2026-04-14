@@ -553,8 +553,21 @@ const App = () => {
   );
 
   const priority = (s: string) => { if (s.includes("Review Client")) return 0; if (s.includes("Brief")) return 1; if (s.includes("Pré-production")) return 2; if (s.includes("Tournage")) return 3; if (s.includes("Post-production")) return 4; if (s.includes("Revision")) return 5; if (s.includes("Livrée")) return 6; return 10; };
-  const ongoing = videos.filter(v => !v.status.includes("Livrée")).sort((a, b) => priority(a.status) - priority(b.status));
-  const delivered = videos.filter(v => v.status.includes("Livrée")).sort((a, b) => (b.deadline ? new Date(b.deadline).getTime() : 0) - (a.deadline ? new Date(a.deadline).getTime() : 0));
+  const titleNum = (t: string) => { const m = t.match(/^(\d+)/); return m ? parseInt(m[1], 10) : null; };
+  const ongoing = videos.filter(v => !v.status.includes("Livrée")).sort((a, b) => {
+    const na = titleNum(a.title), nb = titleNum(b.title);
+    if (na !== null && nb !== null) return nb - na;
+    if (na !== null) return -1;
+    if (nb !== null) return 1;
+    return b.progress - a.progress;
+  });
+  const delivered = videos.filter(v => v.status.includes("Livrée")).sort((a, b) => {
+    const na = titleNum(a.title), nb = titleNum(b.title);
+    if (na !== null && nb !== null) return nb - na;
+    if (na !== null) return -1;
+    if (nb !== null) return 1;
+    return (b.deadline ? new Date(b.deadline).getTime() : 0) - (a.deadline ? new Date(a.deadline).getTime() : 0);
+  });
 
   // Group ongoing videos by project
   const ongoingByProject = (() => {
