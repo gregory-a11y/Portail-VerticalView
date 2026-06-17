@@ -554,7 +554,12 @@ const App = () => {
 
   const priority = (s: string) => { if (s.includes("Review Client")) return 0; if (s.includes("Brief")) return 1; if (s.includes("Pré-production")) return 2; if (s.includes("Tournage")) return 3; if (s.includes("Post-production")) return 4; if (s.includes("Revision")) return 5; if (s.includes("Livrée")) return 6; return 10; };
   const titleNum = (t: string) => { const m = t.match(/^(\d+)/); return m ? parseInt(m[1], 10) : null; };
+  const isRevision = (v: Video) => v.status.includes("Revision Interne");
   const ongoing = videos.filter(v => !v.status.includes("Livrée")).sort((a, b) => {
+    // Règle principale : Révision Interne toujours en haut de la pile
+    const ra = isRevision(a) ? 0 : 1, rb = isRevision(b) ? 0 : 1;
+    if (ra !== rb) return ra - rb;
+    // Règles secondaires : numéro décroissant, puis progression
     const na = titleNum(a.title), nb = titleNum(b.title);
     if (na !== null && nb !== null) return nb - na;
     if (na !== null) return -1;
