@@ -36,7 +36,9 @@ export default async function handler(req: Request): Promise<Response> {
     if (v) headers.set(h, v);
   }
   if (!headers.has('accept-ranges')) headers.set('accept-ranges', 'bytes');
-  headers.set('cache-control', 'public, max-age=3600');
+  // PAS de cache CDN : Vercel ne varie pas son cache sur le header Range et rejouerait
+  // un même fragment (ex. les 1024 premiers octets) pour toutes les plages → vidéo illisible.
+  headers.set('cache-control', 'no-store');
 
   return new Response(upstream.body, { status: upstream.status, headers });
 }
