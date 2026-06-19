@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import {
-  Play, CheckCircle2, Clock, AlertCircle, FileText, Phone, Mail,
+  Play, Pause, CheckCircle2, Clock, AlertCircle, FileText, Phone, Mail,
   ChevronRight, ChevronDown, ListVideo, X, ArrowUpRight, ExternalLink,
   FolderOpen, Loader2, AlertTriangle, MessageCircle, RefreshCw, Video as VideoIcon
 } from "lucide-react";
@@ -246,8 +246,20 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
-  useEffect(() => { setVideoLoaded(false); setVideoError(false); }, [video?.id]);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  useEffect(() => { setVideoLoaded(false); setVideoError(false); setIsPlaying(false); setCurrentTime(0); setDuration(0); }, [video?.id]);
   if (!isOpen || !video) return null;
+
+  const togglePlay = () => { const v = videoRef.current; if (!v) return; if (v.paused) v.play().catch(() => {}); else v.pause(); };
+  const seek = (e: React.MouseEvent<HTMLDivElement>) => {
+    const v = videoRef.current; if (!v || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    v.currentTime = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * duration;
+  };
+  const fmtTime = (s: number) => { if (!isFinite(s) || s < 0) return '0:00'; const m = Math.floor(s / 60); return `${m}:${Math.floor(s % 60).toString().padStart(2, '0')}`; };
 
   const isDelivered = video.status.includes("Livrée");
   const isReview = video.status.includes("Review Client");
@@ -313,8 +325,35 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
               </div>
             )}
             {isDirect ? (
-              <video controls playsInline webkit-playsinline="true" preload="auto" className={`w-full h-full object-contain transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} src={embedUrl}
-                onLoadedData={() => setVideoLoaded(true)} onError={() => { setVideoError(true); setVideoLoaded(false); }} />
+              <>
+                <video ref={videoRef} playsInline webkit-playsinline="true" preload="auto" className={`w-full h-full object-contain transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} src={embedUrl}
+                  onLoadedData={() => setVideoLoaded(true)} onLoadedMetadata={e => setDuration(e.currentTarget.duration)}
+                  onTimeUpdate={e => setCurrentTime(e.currentTarget.currentTime)} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} onEnded={() => setIsPlaying(false)}
+                  onClick={togglePlay} onError={() => { setVideoError(true); setVideoLoaded(false); }} />
+                {videoLoaded && (
+                  <>
+                    {!isPlaying && (
+                      <button onClick={togglePlay} aria-label="Lecture" className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white transition-all hover:bg-black/55 active:scale-95 z-20">
+                        <Play size={26} className="ml-0.5" fill="currentColor" />
+                      </button>
+                    )}
+                    <div className="absolute bottom-0 left-0 right-0 px-4 pb-3 pt-8 bg-gradient-to-t from-black/70 to-transparent z-20">
+                      <div className="flex items-center gap-2.5">
+                        <button onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Lecture'} className="text-white shrink-0">
+                          {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+                        </button>
+                        <span className="text-white text-[10px] font-medium tabular-nums shrink-0">{fmtTime(currentTime)}</span>
+                        <div onClick={seek} className="flex-1 h-3 flex items-center cursor-pointer">
+                          <div className="w-full h-[3px] rounded-full bg-white/25 overflow-hidden">
+                            <div className="h-full rounded-full bg-white transition-[width] duration-100" style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }} />
+                          </div>
+                        </div>
+                        <span className="text-white/70 text-[10px] font-medium tabular-nums shrink-0">{fmtTime(duration)}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </>
             ) : (
               <iframe src={embedUrl} className={`w-full h-full transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
                 frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="eager" onLoad={() => setVideoLoaded(true)} />
