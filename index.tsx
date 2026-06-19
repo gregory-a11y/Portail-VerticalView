@@ -313,7 +313,7 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
               </div>
             )}
             {isDirect ? (
-              <video controls preload="auto" className={`w-full h-full object-contain transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} src={embedUrl}
+              <video controls playsInline webkit-playsinline="true" preload="auto" className={`w-full h-full object-contain transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`} src={embedUrl}
                 onLoadedData={() => setVideoLoaded(true)} onError={() => { setVideoError(true); setVideoLoaded(false); }} />
             ) : (
               <iframe src={embedUrl} className={`w-full h-full transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
