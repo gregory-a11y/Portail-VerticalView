@@ -80,7 +80,7 @@ function videoProxy(): Plugin {
           const id = new URL(req.url || '', 'http://localhost').searchParams.get('id') || '';
           if (!/^[a-zA-Z0-9_-]{10,}$/.test(id)) { res.statusCode = 400; res.end('Invalid id'); return; }
           const range = req.headers['range'];
-          const upstream = await fetch(`https://drive.google.com/uc?export=view&id=${id}`, {
+          const upstream = await fetch(`https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`, {
             headers: range ? { Range: String(range) } : {},
             redirect: 'follow',
           });

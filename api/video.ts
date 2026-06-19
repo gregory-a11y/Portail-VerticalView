@@ -16,7 +16,10 @@ export default async function handler(req: Request): Promise<Response> {
   if (!ID_RE.test(id)) return new Response('Invalid id', { status: 400 });
 
   const range = req.headers.get('range');
-  const upstream = await fetch(`https://drive.google.com/uc?export=view&id=${id}`, {
+  // `usercontent/download?export=download&confirm=t` sert le flux vidéo directement et
+  // bypasse l'interstitiel antivirus de Google sur les fichiers > 100 Mo (`uc?export=view`
+  // renvoyait une page HTML pour ces gros fichiers). Marche pour petits ET gros fichiers.
+  const upstream = await fetch(`https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`, {
     headers: range ? { Range: range } : {},
     redirect: 'follow',
   });
