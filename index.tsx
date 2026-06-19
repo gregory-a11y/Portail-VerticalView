@@ -282,8 +282,8 @@ const VideoModal = ({ video, isOpen, onClose, onVideoUpdated, client }: { video:
     if (!url) return null; let m;
     if ((m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/))) return { url: `https://www.youtube.com/embed/${m[1]}`, direct: false };
     if ((m = url.match(/vimeo\.com\/(\d+)/))) return { url: `https://player.vimeo.com/video/${m[1]}`, direct: false };
-    if ((m = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/))) return { url: `https://drive.google.com/uc?export=view&id=${m[1]}`, direct: true, fallbackUrl: `https://drive.google.com/file/d/${m[1]}/preview` };
-    if ((m = url.match(/drive\.google\.com\/open\?id=([^&]+)/))) return { url: `https://drive.google.com/uc?export=view&id=${m[1]}`, direct: true, fallbackUrl: `https://drive.google.com/file/d/${m[1]}/preview` };
+    if ((m = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/))) return { url: `${API_BASE_URL}/video?id=${m[1]}`, direct: true, fallbackUrl: `https://drive.google.com/file/d/${m[1]}/preview` };
+    if ((m = url.match(/drive\.google\.com\/open\?id=([^&]+)/))) return { url: `${API_BASE_URL}/video?id=${m[1]}`, direct: true, fallbackUrl: `https://drive.google.com/file/d/${m[1]}/preview` };
     if (url.match(/\.(mp4|webm|ogg)$/i)) return { url, direct: true };
     return null;
   };

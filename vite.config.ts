@@ -69,6 +69,38 @@ function airtableProxy(apiKey: string, baseId: string): Plugin {
   };
 }
 
+// Miroir dev de l'Edge Function api/video.ts : proxifie le flux vidéo Google Drive
+// en same-origin pour que le lecteur custom marche aussi en local (port 3333).
+function videoProxy(): Plugin {
+  return {
+    name: 'video-proxy',
+    configureServer(server) {
+      server.middlewares.use('/api/video', async (req, res) => {
+        try {
+          const id = new URL(req.url || '', 'http://localhost').searchParams.get('id') || '';
+          if (!/^[a-zA-Z0-9_-]{10,}$/.test(id)) { res.statusCode = 400; res.end('Invalid id'); return; }
+          const range = req.headers['range'];
+          const upstream = await fetch(`https://drive.google.com/uc?export=view&id=${id}`, {
+            headers: range ? { Range: String(range) } : {},
+            redirect: 'follow',
+          });
+          if (upstream.status !== 200 && upstream.status !== 206) { res.statusCode = 502; res.end('Upstream unavailable'); return; }
+          res.statusCode = upstream.status;
+          for (const h of ['content-type', 'content-length', 'content-range', 'accept-ranges']) {
+            const v = upstream.headers.get(h);
+            if (v) res.setHeader(h, v);
+          }
+          if (!upstream.headers.get('accept-ranges')) res.setHeader('Accept-Ranges', 'bytes');
+          res.end(Buffer.from(await upstream.arrayBuffer()));
+        } catch {
+          res.statusCode = 502;
+          res.end('proxy error');
+        }
+      });
+    }
+  };
+}
+
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
@@ -81,7 +113,8 @@ export default defineConfig(({ mode }) => {
         airtableProxy(
           env.VITE_AIRTABLE_API_KEY || env.AIRTABLE_API_KEY || '',
           env.VITE_AIRTABLE_BASE_ID || env.AIRTABLE_BASE_ID || ''
-        )
+        ),
+        videoProxy()
       ],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
